@@ -1,7 +1,7 @@
 MC857
 =====
 
->Cálculo da integralização de alunos da UNICAMP
+>Cálculo da integralização de alunos da UNICAMP. Servidor de dados em Python e aplicativo móvel para Android.
 
 
 Etapas
