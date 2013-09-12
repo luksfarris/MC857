@@ -9,9 +9,9 @@ Etapas
 >
 [X] Modelagem do Sistema
 >
-[ ] Definição dos contratos
+[X] Definição dos contratos
 >
-[ ] Revisão da modelagem e contratos
+[X] Revisão da modelagem e contratos
 >
 [ ] Construção (implementação)
 >
