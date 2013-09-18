@@ -24,7 +24,17 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		integralizarButton = (Button) findViewById(R.id.submit);
+		integralizarButton.setOnClickListener(calcularIntegralizacao);
 	}
+	
+	 private OnClickListener calcularIntegralizacao = new OnClickListener() {
+	        public void onClick(View v) {
+//	        	Toast.makeText(this, "My button was clicked", Toast.LENGTH_SHORT );
+//	        getContext().startActivity(new Intent(getContext(), ScreenshotActivity.class));
+	        }
+	    };  
+
 	
 	@Override
 	protected void onResume() {
@@ -42,11 +52,11 @@ public class MainActivity extends Activity {
 	}
 
 	private void calcularIntegralizacao() {
-		// TODO: metodo que recebe do controller o resultado do cálculo da integralização e a exibe
+		// TODO: metodo que recebe do controller o resultado do cï¿½lculo da integralizaï¿½ï¿½o e a exibe
 	}
 	
 	private void exibirResultado() {
-		// TODO: metodo que recebe do controller o resultado calculado e mostra ao usuário
+		// TODO: metodo que recebe do controller o resultado calculado e mostra ao usuï¿½rio
 	}
 	
 	private class LongOperation extends AsyncTask<String, Void, String> {
