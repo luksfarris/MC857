@@ -1,7 +1,11 @@
 package com.br.unicamp.mc857integralizacaodac.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
+import com.br.unicamp.mc857integralizacaodac.model.Disciplina;
 import com.br.unicamp.mc857integralizacaodac.model.Historico;
 
 public class AppController {
@@ -17,40 +21,61 @@ public class AppController {
 	}
 		
 	public Boolean validarIntegralizacao(){
-		/* TODO: ≠≠ MÈtodo que retorna se È v·lida a integralizaÁ„o, dado um RA e uma integralizaÁ„o
+		/* TODO: ¬≠¬≠ M√©todo que retorna se √© v√°lida a integraliza√ß√£o, dado um RA e uma integraliza√ß√£o
 		require
-		o RA e a integralizaÁ„o devem ser v·lidos
+		o RA e a integraliza√ß√£o devem ser v√°lidos
 		ensure
-		a view ser· notificada com a resposta booleana do WebServiceMÈtodo que retorna se È v·lida a integralizaÁ„o, dado um RA e uma integralizaÁ„o*/
+		a view ser√° notificada com a resposta booleana do WebServiceM√©todo que retorna se √© v√°lida a integraliza√ß√£o, dado um RA e uma integraliza√ß√£o*/
 		return true;
 	}
 	
 	public void recuperarInformacoesDoServico(){
 		
-		/* TODO: ≠≠ MÈtodo que preenche os atributos Catalogo e Historico vindo do WebService
+		/* TODO: ¬≠¬≠ M√©todo que preenche os atributos Catalogo e Historico vindo do WebService
 		require
-		o RA e o curso devem ser v·lidos
+		o RA e o curso devem ser v√°lidos
 		ensure
-		os atributos Catalogo e Historico foram preenchidos (n„o s„o nulos)*/
-		assert (!ra.isEmpty()) : "ra n„o pode ser nulo";
-		assert (curso > 0) : "curso inv·lido";
+		os atributos Catalogo e Historico foram preenchidos (n√£o s√£o nulos)*/
+		assert (ra.length()>0) : "ra n√£o pode ser nulo";
+		assert (curso > 0) : "curso inv√°lido";
 		
 		String xmlHist=""; //TODO request trazendo  historico
 		String xmlCat=""; //TODO request trazendo catalogo
 		this.setHistorico(Parser.parseHistorico(xmlHist));
 		this.setCatalogo(Parser.parseCatalogo(xmlCat));
 		
-		assert (historico != null) : "historico inv·lido";
-		assert (catalogo != null) : "catalogo inv·lido";
+		assert (historico != null) : "historico inv√°lido";
+		assert (catalogo != null) : "catalogo inv√°lido";
 	}
 	
-	public Atribuicao gerarIntegralizaÁ„o(Historico historico, Catalogo catalogo) {
-		/* TODO: ≠≠ MÈtodo respons·vel por gerar a integralizaÁ„o a partir dos dados obtidos nos webservices
+	/**
+	 * Gera a integralizacao do usuario, dados
+	 * @param historico um historico do aluno
+	 * @param catalogo o catalogo do curso dele
+	 * @return uma atribuicao de disciplinas
+	 */
+	public Atribuicao gerarIntegraliza√ß√£o(Historico historico, Catalogo catalogo) {
+		/* TODO: ¬≠¬≠ M√©todo respons√°vel por gerar a integraliza√ß√£o a partir dos dados obtidos nos webservices
 		require
-		o histÛrico e o cat·logo devem ser v·lidos
+		o hist√≥rico e o cat√°logo devem ser v√°lidos
 		ensure
 		Todas as disciplinas do historico foram alocadas*/
+		assert (null != catalogo) : "historico n√£o pode ser nulo";
+		assert (null != historico) : "catalogo n√£o pode ser nulo";
 		Atribuicao atribuicao = new Atribuicao();
+		// primeiramente checa se ele fez todas as obrigat√≥rias
+		for (Disciplina disciplina : historico.getDisciplinas()) {
+			// se ela for obrigatoria, adiciona na atribuicao
+			if (isDisciplinaObrigatoria(disciplina, catalogo)) {
+				atribuicao.getDisciplinas().add(disciplina);
+			}
+		}
+		// checa se ele fez todas as obrigatorias
+		if (catalogo.getDisciplinas().size() != atribuicao.getDisciplinas().size()) {
+			// nao fez todas as obrigatorias
+			atribuicao.setIntegral(false);
+			return atribuicao;
+		}
 		return atribuicao;
 	}
 
@@ -86,4 +111,22 @@ public class AppController {
 		this.catalogo = catalogo;
 	}
 	
+	
+	
+	/**
+	 * Checa se uma disciplina e obrigatoria
+	 * @param disciplina disciplina a ser checada
+	 * @param catalogo catologo para comparar
+	 * @return se a disciplina e obrigatoria no catalogo
+	 */
+	private boolean isDisciplinaObrigatoria(Disciplina disciplina, Catalogo catalogo) {
+		boolean obrigatoria = false;
+		for (Disciplina disciplinaCorrente : catalogo.getDisciplinas()) {
+			if (disciplina.getSigla().equalsIgnoreCase(disciplinaCorrente.getSigla())) {
+				obrigatoria = true;
+				break;
+			}
+		}
+		return obrigatoria;
+	}
 }
