@@ -4,5 +4,8 @@
     <string name="app_name">MC857IngrelizacaoDAC</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="welcome_msg">Calcule sua integralização!</string>
+    <string name="ra_hint">Número do RA</string>
+    <string name="curso_hint">Número do curso</string>
 
 </resources>
