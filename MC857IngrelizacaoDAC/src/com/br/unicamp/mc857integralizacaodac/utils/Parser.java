@@ -134,17 +134,13 @@ public class Parser {
 
 											grupo.getDisciplinas().add(disc);
 										}
-
 										dx = dx.getNextSibling();
 									}
 								}
-
 								ex = ex.getNextSibling();
 							}
-
 							cat.getGrupos().add(grupo);
 						}
-
 						gex = gex.getNextSibling();
 					}
 				} else if(cx.getNodeType()==1 && cx.getNodeName().equals("modalidades")) {

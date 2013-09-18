@@ -15,7 +15,7 @@ import com.opensymphony.xwork2.ActionSupport;
 
 public class BuscarHistoricoController  extends ActionSupport{
 
-	private final String URL_BASE = "http://localhost:81//";
+	private final String URL_BASE = "http://localhost:80//";
 
 	private String ra;
 
@@ -28,7 +28,7 @@ public class BuscarHistoricoController  extends ActionSupport{
 			@Result( type="stream", name=SUCCESS)}
 			)
 	public String buscaHistorico() {
-		String url = "?serv=h&ra="+ra;
+		String url = URL_BASE + "?serv=h&ra="+ra;
 		StringBuffer response;
 
 		try {
