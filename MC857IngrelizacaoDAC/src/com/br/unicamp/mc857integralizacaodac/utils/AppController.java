@@ -1,29 +1,29 @@
 package com.br.unicamp.mc857integralizacaodac.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
 import com.br.unicamp.mc857integralizacaodac.model.Disciplina;
 import com.br.unicamp.mc857integralizacaodac.model.Historico;
+import com.br.unicamp.mc857integralizacaodac.model.Modalidade;
 
 public class AppController {
 	
 	private Historico historico;
 	private Catalogo catalogo;
 	private String ra;
+	private String modalidade;
 	private int curso;
 	
-	public AppController(String ra, int curso){
+	public AppController(String ra, int curso, String modalidade){
 		this.ra = ra;
 		this.curso = curso;
+		this.modalidade = modalidade;
 	}
 		
 	public Boolean validarIntegralizacao(){
 		/* TODO: ­­ Método que retorna se é válida a integralização, dado um RA e uma integralização
 		require
-		o RA e a integralização devem ser válidos
+		o RA e a integralizacao devem ser válidos
 		ensure
 		a view será notificada com a resposta booleana do WebServiceMétodo que retorna se é válida a integralização, dado um RA e uma integralização*/
 		return true;
@@ -54,10 +54,10 @@ public class AppController {
 	 * @param catalogo o catalogo do curso dele
 	 * @return uma atribuicao de disciplinas
 	 */
-	public Atribuicao gerarIntegralização(Historico historico, Catalogo catalogo) {
-		/* TODO: ­­ Método responsável por gerar a integralização a partir dos dados obtidos nos webservices
+	public Atribuicao gerarIntegralizacao(Historico historico, Catalogo catalogo) {
+		/* TODO: Metodo responsavel por gerar a integralizacao a partir dos dados obtidos nos webservices
 		require
-		o histórico e o catálogo devem ser válidos
+		o historico e o catalogo devem ser validos
 		ensure
 		Todas as disciplinas do historico foram alocadas*/
 		assert (null != catalogo) : "historico não pode ser nulo";
@@ -70,12 +70,15 @@ public class AppController {
 				atribuicao.getDisciplinas().add(disciplina);
 			}
 		}
+		
+		
 		// checa se ele fez todas as obrigatorias
 		if (catalogo.getDisciplinas().size() != atribuicao.getDisciplinas().size()) {
 			// nao fez todas as obrigatorias
 			atribuicao.setIntegral(false);
-			return atribuicao;
 		}
+		
+		
 		return atribuicao;
 	}
 
@@ -127,6 +130,21 @@ public class AppController {
 				break;
 			}
 		}
+		
+		for (Modalidade modalidade : catalogo.getModalidades()) {
+			if (this.modalidade.equalsIgnoreCase(modalidade.getNome())) {
+				for (Disciplina disciplinaCorrente : modalidade.getDisciplinas()) {
+					if (disciplina.getSigla().equalsIgnoreCase(disciplinaCorrente.getSigla())) {
+						obrigatoria = true;
+						break;
+					}
+				}
+				if (obrigatoria = true) {
+					break;
+				}
+			}
+		}
+		
 		return obrigatoria;
 	}
 }
