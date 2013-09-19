@@ -11,13 +11,11 @@ public class AppController {
 	private Historico historico;
 	private Catalogo catalogo;
 	private String ra;
-	private String modalidade;
 	private int curso;
 	
-	public AppController(String ra, int curso, String modalidade){
+	public AppController(String ra, int curso){
 		this.ra = ra;
 		this.curso = curso;
-		this.modalidade = modalidade;
 	}
 		
 	public Boolean validarIntegralizacao(){
@@ -63,22 +61,42 @@ public class AppController {
 		assert (null != catalogo) : "historico não pode ser nulo";
 		assert (null != historico) : "catalogo não pode ser nulo";
 		Atribuicao atribuicao = new Atribuicao();
-		// primeiramente checa se ele fez todas as obrigatórias
+		
+		
+		/* 1) Classificar as disciplinas do historico em:
+		 * Obrigatorias do curso
+		 * Obrigatorias da modalidade
+		 * Eletorias da modalidade
+		 * Eletorias do curso
+		 * Eletivas da modalidade
+		 * Eletivas do curso
+		 */
+		
+		/* 2) Atribuir o maximo de disciplians possivel em cada um dos grupos acima, em ordem
+		 */
+		
+		
+		/*
+		 * 3) Se a atribuicao completou o catalogo, formou
+		 */
+		
+		
+		
+		
+		/* 
+		// primeiramente checa se ele fez todas as obrigatorias
 		for (Disciplina disciplina : historico.getDisciplinas()) {
 			// se ela for obrigatoria, adiciona na atribuicao
-			if (isDisciplinaObrigatoria(disciplina, catalogo)) {
+			if (isDisciplinaObrigatoria(disciplina, catalogo, historico)) {
+				// adiciona ela no catalogo
 				atribuicao.getDisciplinas().add(disciplina);
 			}
 		}
-		
-		
 		// checa se ele fez todas as obrigatorias
 		if (catalogo.getDisciplinas().size() != atribuicao.getDisciplinas().size()) {
 			// nao fez todas as obrigatorias
 			atribuicao.setIntegral(false);
-		}
-		
-		
+		}*/
 		return atribuicao;
 	}
 
@@ -116,29 +134,27 @@ public class AppController {
 	
 	
 	
+	
 	/**
 	 * Checa se uma disciplina e obrigatoria
 	 * @param disciplina disciplina a ser checada
 	 * @param catalogo catologo para comparar
 	 * @return se a disciplina e obrigatoria no catalogo
 	 */
-	private boolean isDisciplinaObrigatoria(Disciplina disciplina, Catalogo catalogo) {
+	private boolean isDisciplinaObrigatoria(Disciplina disciplina, Catalogo catalogo, Historico historico) {
+		
 		boolean obrigatoria = false;
-		for (Disciplina disciplinaCorrente : catalogo.getDisciplinas()) {
-			if (disciplina.getSigla().equalsIgnoreCase(disciplinaCorrente.getSigla())) {
-				obrigatoria = true;
-				break;
-			}
+		// pra cada disciplina obrigatoria do catalogo
+		
+		obrigatoria = catalogo.getDisciplinas().contains (disciplina);
+		
+		if (obrigatoria == true) {
+			return obrigatoria;
 		}
 		
 		for (Modalidade modalidade : catalogo.getModalidades()) {
-			if (this.modalidade.equalsIgnoreCase(modalidade.getNome())) {
-				for (Disciplina disciplinaCorrente : modalidade.getDisciplinas()) {
-					if (disciplina.getSigla().equalsIgnoreCase(disciplinaCorrente.getSigla())) {
-						obrigatoria = true;
-						break;
-					}
-				}
+			if (historico.getModalidade().equalsIgnoreCase(modalidade.getNome())) {
+				obrigatoria = modalidade.getDisciplinas().contains(disciplina);
 				if (obrigatoria = true) {
 					break;
 				}
