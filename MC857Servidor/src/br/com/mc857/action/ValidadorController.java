@@ -1,5 +1,6 @@
 package br.com.mc857.action;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
@@ -37,9 +38,10 @@ public class ValidadorController extends ActionSupport{
 			)
 	public String valida(){
 		Atribuicao attr = new Gson().fromJson(atribuicaoString, Atribuicao.class);
-		//TODO: Tem que gerar a atribuicao a partir do dado vindo do request
+
 		Boolean formou = validaIntegralizacao(attr, ra);
 
+		inputStream = new ByteArrayInputStream(formou.toString().getBytes());
 
 		return SUCCESS;
 
@@ -52,11 +54,26 @@ public class ValidadorController extends ActionSupport{
 		Catalogo catalogo = Parser.parseCatalogo(catBuffer.toString());
 
 		//vamos ver as disciplinas obrigatorias
-		boolean fezAsObrigatorias = cumpriuGrupo(atribuicao.getDisciplinas(), catalogo.getDisciplinas());
+		boolean fezAsObrigatorias = cumpriuObrigatorias(atribuicao.getDisciplinas(), catalogo.getDisciplinas());
 		if(!fezAsObrigatorias){
 			return false;
 		}
-
+		
+		for(GrupoEletiva grupoFeito : atribuicao.getGrupos()){
+			boolean fezAsEletivas = false;
+			for(GrupoEletiva grupoNecessario : catalogo.getGrupos()) {
+				if(cumpriuEletivas(grupoFeito.getDisciplinas(), grupoNecessario.getDisciplinas(), grupoNecessario.getCredito())){
+					fezAsEletivas = true;
+					break;
+				}
+			}
+			
+			if(!fezAsEletivas){
+				return false;
+			}
+		}
+		
+		
 		//vamos ver as diciplinas obrigatorias da modalidade
 		boolean fezAsObrigatoriasDaModalidade = true;
 
@@ -64,7 +81,7 @@ public class ValidadorController extends ActionSupport{
 			for(Modalidade modalidade : catalogo.getModalidades()){
 				if(modalidade.getNome().equals(historico.getModalidade())){
 					fezAsObrigatoriasDaModalidade = 
-							cumpriuGrupo(atribuicao.getModalidades().get(0).getDisciplinas(), modalidade.getDisciplinas());
+							cumpriuObrigatorias(atribuicao.getModalidades().get(0).getDisciplinas(), modalidade.getDisciplinas());
 
 					if(!fezAsObrigatoriasDaModalidade){
 						return false;
@@ -73,7 +90,7 @@ public class ValidadorController extends ActionSupport{
 					for(GrupoEletiva grupoFeito : atribuicao.getModalidades().get(0).getGrupos()){
 						boolean fezAsEletivasDaModalidade = false;
 						for(GrupoEletiva grupoNecessario : modalidade.getGrupos()) {
-							if(cumpriuGrupo(grupoFeito.getDisciplinas(), grupoNecessario.getDisciplinas())){
+							if(cumpriuEletivas(grupoFeito.getDisciplinas(), grupoNecessario.getDisciplinas(), grupoNecessario.getCredito())){
 								fezAsEletivasDaModalidade = true;
 								break;
 							}
@@ -91,19 +108,32 @@ public class ValidadorController extends ActionSupport{
 		return true;
 	}
 
-	private Boolean cumpriuGrupo(List<Disciplina> feitas, List<Disciplina> necessarias){
+	private Boolean cumpriuObrigatorias(List<Disciplina> feitas, List<Disciplina> necessarias){
 		Boolean cumpriu = true;
+		
+		if(feitas.size() != necessarias.size()) {
+			return false;
+		}
+		
 		for(Disciplina feita : feitas){
-			cumpriu = feitas.contains(feita);
+			cumpriu = necessarias.contains(feita);
 			if(!cumpriu){
 				break;
 			}
 		}
 		return cumpriu;
 	}
-
-
-
-
+	
+	private Boolean cumpriuEletivas(List<Disciplina> feitas, List<Disciplina> necessarias, int credito){
+		int creditoFeito = 0;
+		
+		for(Disciplina feita : feitas){
+			if(necessarias.contains(feita)){
+				creditoFeito += feita.getCredito();
+			}
+		}
+		
+		return creditoFeito >= credito;
+	}
 
 }
