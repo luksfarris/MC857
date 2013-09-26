@@ -4,6 +4,7 @@ import java.util.List;
 
 public class GrupoEletiva {
 	private Integer credito;
+	private Integer creditosFeitos = 0;
 	private List<Disciplina> disciplinas;
 	
 	public Integer getCredito() {
@@ -17,5 +18,11 @@ public class GrupoEletiva {
 	}
 	public void setDisciplinas(List<Disciplina> disciplinas) {
 		this.disciplinas = disciplinas;
+	}
+	public Integer getCreditosFeitos() {
+		return creditosFeitos;
+	}
+	public void setCreditosFeitos(Integer creditosFeitos) {
+		this.creditosFeitos = creditosFeitos;
 	}
 }

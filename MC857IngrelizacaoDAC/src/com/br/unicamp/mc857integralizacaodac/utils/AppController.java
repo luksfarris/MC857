@@ -1,12 +1,13 @@
 package com.br.unicamp.mc857integralizacaodac.utils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
 import com.br.unicamp.mc857integralizacaodac.model.Disciplina;
 import com.br.unicamp.mc857integralizacaodac.model.DisciplinaAtribuida;
+import com.br.unicamp.mc857integralizacaodac.model.GrupoEletiva;
 import com.br.unicamp.mc857integralizacaodac.model.Historico;
 import com.br.unicamp.mc857integralizacaodac.model.Modalidade;
 
@@ -17,13 +18,16 @@ public class AppController {
 	private String ra;
 	private int curso;
 	
+	private List<DisciplinaAtribuida> eletivas;
+	private List<GrupoEletiva> grupoDeEletivas;
+	
 	public AppController(String ra, int curso){
 		this.ra = ra;
 		this.curso = curso;
 	}
 		
 	public Boolean validarIntegralizacao(){
-		/* TODO: Me�todo que retorna se e valida a integralização, dado um RA e uma integralizacao
+		/* TODO: Método que retorna se e valida a integralização, dado um RA e uma integralizacao
 		require
 		o RA e a integralizacao devem ser válidos
 		ensure
@@ -50,6 +54,47 @@ public class AppController {
 		assert (catalogo != null) : "catalogo inválido";
 	}
 	
+	private boolean jaTemosSolucao(){
+		for(GrupoEletiva grupo : grupoDeEletivas){
+			if(grupo.getCredito() < grupo.getCreditosFeitos()){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private void associa(DisciplinaAtribuida disciplina, GrupoEletiva grupo){
+		grupo.setCreditosFeitos(grupo.getCreditosFeitos()+disciplina.getCredito());
+	}
+	
+	private void dissocia(DisciplinaAtribuida disciplina, GrupoEletiva grupo){
+		grupo.setCreditosFeitos(grupo.getCreditosFeitos()-disciplina.getCredito());
+	}
+	
+	private boolean tenta(Integer i){
+		if(jaTemosSolucao()){
+			return true;
+		}
+		if(i >= eletivas.size()){
+			return false;
+		}
+		boolean achou = false;
+		DisciplinaAtribuida disciplinaAtual = eletivas.get(i);
+		for(GrupoEletiva grupo : grupoDeEletivas){
+			if(grupo.getDisciplinas().contains(disciplinaAtual) && grupo.getCreditosFeitos() < grupo.getCredito()){
+				if(!achou){
+					associa(disciplinaAtual, grupo);
+					achou = tenta(i+1);
+					dissocia(disciplinaAtual, grupo);
+				}
+			}
+		}
+		if(!achou){
+			achou = tenta(i+1);
+		}
+		return achou;
+	}
+	
 	/**
 	 * Gera a integralizacao do usuario, dados
 	 * @param historico um historico do aluno
@@ -72,10 +117,31 @@ public class AppController {
 		Modalidade modalidade = new Modalidade();
 		modalidade.setNome(historico.getModalidade());
 		atribuicao.getModalidades().add(modalidade);
+		
+		for(GrupoEletiva gr : catalogo.getGrupos()){
+			GrupoEletiva grupo = new GrupoEletiva();
+			grupo.setCredito(gr.getCredito());
+			grupo.setDisciplinas(gr.getDisciplinas());
+			grupoDeEletivas.add(grupo);
+		}
+		for(Modalidade mod : catalogo.getModalidades()){
+			if(mod.getNome().equals(historico.getModalidade())){
+				for(GrupoEletiva gr : mod.getGrupos()){
+					GrupoEletiva grupo = new GrupoEletiva();
+					grupo.setCredito(gr.getCredito());
+					grupo.setDisciplinas(gr.getDisciplinas());
+					grupoDeEletivas.add(grupo);
+				}
+			}
+		}
+		//agora tenho os grupos de eletivas que preciso preencher na lista "grupoDeEletivas"
+		
 
 		// classifica as disciplinas
-		ArrayList<DisciplinaAtribuida> eletivas = classificar(atribuicao);
+		eletivas = classificar(atribuicao);
+		//as obrigatorias estao na atribuicao
 		
+		boolean formou = tenta(0);
 		// preenche atribuicao
 		
 		
