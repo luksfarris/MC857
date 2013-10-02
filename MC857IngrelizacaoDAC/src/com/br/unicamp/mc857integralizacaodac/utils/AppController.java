@@ -6,7 +6,7 @@ import java.util.List;
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
 import com.br.unicamp.mc857integralizacaodac.model.Disciplina;
-import com.br.unicamp.mc857integralizacaodac.model.DisciplinaAtribuida;
+import com.br.unicamp.mc857integralizacaodac.model.Disciplina;
 import com.br.unicamp.mc857integralizacaodac.model.GrupoEletiva;
 import com.br.unicamp.mc857integralizacaodac.model.Historico;
 import com.br.unicamp.mc857integralizacaodac.model.Modalidade;
@@ -18,8 +18,9 @@ public class AppController {
 	private String ra;
 	private int curso;
 	
-	private List<DisciplinaAtribuida> eletivas;
+	private List<Disciplina> eletivas;
 	private List<GrupoEletiva> grupoDeEletivas;
+	private Atribuicao atribuicao;
 	
 	public AppController(String ra, int curso){
 		this.ra = ra;
@@ -63,12 +64,66 @@ public class AppController {
 		return true;
 	}
 	
-	private void associa(DisciplinaAtribuida disciplina, GrupoEletiva grupo){
+	private void associa(Disciplina disciplina, GrupoEletiva grupo){
 		grupo.setCreditosFeitos(grupo.getCreditosFeitos()+disciplina.getCredito());
+		
+		boolean frag = false;
+		//procura grupo nas eletivas do curso
+		for(GrupoEletiva ge : atribuicao.getGrupos()){
+			if(ge.getId() == grupo.getId()){
+				ge.getDisciplinas().add(disciplina);
+				frag = true;
+				break;
+			}
+		}
+		//procura na modalidade
+		if(!frag){
+			for(GrupoEletiva ge : atribuicao.getModalidades().get(0).getGrupos()){
+				if(ge.getId() == grupo.getId()){
+					ge.getDisciplinas().add(disciplina);
+					break;
+				}
+			}
+		}
 	}
 	
-	private void dissocia(DisciplinaAtribuida disciplina, GrupoEletiva grupo){
+	private void dissocia(Disciplina disciplina, GrupoEletiva grupo){
 		grupo.setCreditosFeitos(grupo.getCreditosFeitos()-disciplina.getCredito());
+		
+		boolean frag = false;
+		//procura grupo nas eletivas do curso
+		for(GrupoEletiva ge : atribuicao.getGrupos()){
+			if(ge.getId() == grupo.getId()){
+				//TODO: testar essa bagaca.. se der pau, pode ser aqui nao estar dando certo o remove :)
+				Disciplina d_aux = null;
+				for(Disciplina d : ge.getDisciplinas()){
+					if(d.getSigla().equalsIgnoreCase(disciplina.getSigla())){
+						d_aux = d;
+						break;
+					}
+				}
+				ge.getDisciplinas().remove(d_aux);
+				frag = true;
+				break;
+			}
+		}
+		//procura na modalidade
+		if(!frag){
+			for(GrupoEletiva ge : atribuicao.getModalidades().get(0).getGrupos()){
+				if(ge.getId() == grupo.getId()){
+					Disciplina d_aux = null;
+					for(Disciplina d : ge.getDisciplinas()){
+						if(d.getSigla().equalsIgnoreCase(disciplina.getSigla())){
+							d_aux = d;
+							break;
+						}
+					}
+					ge.getDisciplinas().remove(d_aux);
+					frag = true;
+					break;
+				}
+			}
+		}
 	}
 	
 	private boolean tenta(Integer i){
@@ -79,7 +134,7 @@ public class AppController {
 			return false;
 		}
 		boolean achou = false;
-		DisciplinaAtribuida disciplinaAtual = eletivas.get(i);
+		Disciplina disciplinaAtual = eletivas.get(i);
 		for(GrupoEletiva grupo : grupoDeEletivas){
 			if(grupo.getDisciplinas().contains(disciplinaAtual) && grupo.getCreditosFeitos() < grupo.getCredito()){
 				if(!achou){
@@ -111,26 +166,52 @@ public class AppController {
 		assert (null != catalogo) : "historico não pode ser nulo";
 		assert (null != historico) : "catalogo não pode ser nulo";
 		
-		Atribuicao atribuicao = new Atribuicao();
+		atribuicao = new Atribuicao();
 		atribuicao.setCodigo(catalogo.getCodigo());
 		atribuicao.setNome(catalogo.getNome());
 		Modalidade modalidade = new Modalidade();
 		modalidade.setNome(historico.getModalidade());
 		atribuicao.getModalidades().add(modalidade);
-		
+		int contador = 1;
 		for(GrupoEletiva gr : catalogo.getGrupos()){
+			gr.setId(contador++);
 			GrupoEletiva grupo = new GrupoEletiva();
 			grupo.setCredito(gr.getCredito());
+			grupo.setId(gr.getId());
+			
+			//grupo para adicionar na atribuicao
+			GrupoEletiva gAtr = new GrupoEletiva();
+			gAtr.setId(gr.getId());
+			gAtr.setCredito(gr.getCredito());
+			
 			grupo.setDisciplinas(gr.getDisciplinas());
+			
 			grupoDeEletivas.add(grupo);
+			if(atribuicao.getGrupos() == null){
+				atribuicao.setGrupos(new ArrayList<GrupoEletiva>());
+			}
+			atribuicao.getGrupos().add(gAtr);
 		}
 		for(Modalidade mod : catalogo.getModalidades()){
 			if(mod.getNome().equals(historico.getModalidade())){
 				for(GrupoEletiva gr : mod.getGrupos()){
+					gr.setId(contador++);
 					GrupoEletiva grupo = new GrupoEletiva();
 					grupo.setCredito(gr.getCredito());
+					
+					
+					//grupo para adicionar na atribuicao
+					GrupoEletiva gAtr = new GrupoEletiva();
+					gAtr.setId(gr.getId());
+					gAtr.setCredito(gr.getCredito());
+					
 					grupo.setDisciplinas(gr.getDisciplinas());
+
 					grupoDeEletivas.add(grupo);
+					if(atribuicao.getModalidades().get(0).getGrupos() == null){
+						atribuicao.getModalidades().get(0).setGrupos(new ArrayList<GrupoEletiva>());
+					}
+					atribuicao.getModalidades().get(0).getGrupos().add(gAtr);
 				}
 			}
 		}
@@ -138,7 +219,7 @@ public class AppController {
 		
 
 		// classifica as disciplinas
-		eletivas = classificar(atribuicao);
+		eletivas = classificar();
 		//as obrigatorias estao na atribuicao
 		
 		boolean formou = tenta(0);
@@ -147,7 +228,53 @@ public class AppController {
 		
 		return atribuicao;
 	}
-
+	
+	/**
+	 * Classifica uma disciplina de acordo com seu tipo
+	 * @param disciplina a disciplina a ser classificada
+	 * @param atribuicao
+	 */
+	public ArrayList<Disciplina> classificar() {
+		
+		// cria lista de eletivas
+		ArrayList<Disciplina> eletivas = new ArrayList<Disciplina>();
+		
+		// pra cada disciplina do catalogo
+		for (Disciplina disciplina : historico.getDisciplinas()) {
+			// cria uma atribuicao da disciplina
+			Disciplina atribuida = new Disciplina();
+			atribuida.setSigla(disciplina.getSigla());
+			atribuida.setCredito(disciplina.getCredito());
+			// checa se ela eh obrigatoria do curso
+			if (catalogo.getDisciplinas().contains (disciplina)) {
+				//se sim, adiciona na atribuicao
+				atribuicao.getDisciplinas().add(atribuida);
+			}
+			// checa se eh obrigatoria da modalidade
+			else if (isObrigatoriaModalidade(disciplina)) {
+				// se sim, adiciona na atribuicao
+				atribuicao.getModalidades().get(0).getDisciplinas().add(atribuida);
+			} else {
+				// adiciona na lista de eletivas
+				eletivas.add(atribuida);
+			}
+		}
+		return eletivas;
+	}
+	
+	
+	private boolean isObrigatoriaModalidade (Disciplina disciplina) {
+		boolean isObrigatoria = false;
+		for (Modalidade modalidade : catalogo.getModalidades()) {
+			if (historico.getModalidade().equalsIgnoreCase(modalidade.getNome())) {
+				if (modalidade.getDisciplinas().contains(disciplina)) {
+					isObrigatoria= true;
+				}
+			}
+		}
+		return isObrigatoria;
+	}
+	
 	public Historico getHistorico() {
 		return historico;
 	}
@@ -178,59 +305,6 @@ public class AppController {
 
 	public void setCatalogo(Catalogo catalogo) {
 		this.catalogo = catalogo;
-	}
-	
-	
-	
-	
-
-	/**
-	 * Classifica uma disciplina de acordo com seu tipo
-	 * @param disciplina a disciplina a ser classificada
-	 * @param atribuicao
-	 */
-	public ArrayList<DisciplinaAtribuida> classificar (Atribuicao atribuicao) {
-		
-		// cria lista de eletivas
-		ArrayList<DisciplinaAtribuida> eletivas = new ArrayList<DisciplinaAtribuida>();
-		
-		// pra cada disciplina do catalogo
-		for (Disciplina disciplina : historico.getDisciplinas()) {
-			// cria uma atribuicao da disciplina
-			DisciplinaAtribuida atribuida = new DisciplinaAtribuida();
-			atribuida.setSigla(disciplina.getSigla());
-			atribuida.setCredito(disciplina.getCredito());
-			// checa se ela eh obrigatoria do curso
-			if (catalogo.getDisciplinas().contains (disciplina)) {
-				//se sim, adiciona na atribuicao
-				atribuida.setTipoAtribuicao(DisciplinaAtribuida.OBRIGATORIA_CURSO);
-				atribuicao.getDisciplinas().add(atribuida);
-			}
-			// checa se eh obrigatoria da modalidade
-			else if (isObrigatoriaModalidade(disciplina)) {
-				// se sim, adiciona na atribuicao
-				atribuida.setTipoAtribuicao(DisciplinaAtribuida.OBRIGATORIA_MODALIDADE);
-				atribuicao.getModalidades().get(0).getDisciplinas().add(atribuida);
-			} else {
-				// adiciona na lista de eletivas
-				atribuida.setTipoAtribuicao(DisciplinaAtribuida.ELETIVA);
-				eletivas.add(atribuida);
-			}
-		}
-		return eletivas;
-	}
-	
-	
-	private boolean isObrigatoriaModalidade (Disciplina disciplina) {
-		boolean isObrigatoria = false;
-		for (Modalidade modalidade : catalogo.getModalidades()) {
-			if (historico.getModalidade().equalsIgnoreCase(modalidade.getNome())) {
-				if (modalidade.getDisciplinas().contains(disciplina)) {
-					isObrigatoria= true;
-				}
-			}
-		}
-		return isObrigatoria;
 	}
 	
 }
