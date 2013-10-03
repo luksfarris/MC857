@@ -12,10 +12,9 @@ import com.br.unicamp.mc857integralizacaodac.model.Historico;
 
 public class WebServiceInterface {
 
-	private String URL_BASE = "http://127.0.0.1:8080/MC857Servidor/";
+	private String URL_BASE = "http://143.106.196.235:8080/MC857Servidor/";
 
-	private Boolean validarIntegralizacao(List<Atribuicao> atribuicoes,
-			String ra) {
+	private Boolean validarIntegralizacao(List<Atribuicao> atribuicoes, String ra) {
 		// TODO: implementar
 		return true;
 	}

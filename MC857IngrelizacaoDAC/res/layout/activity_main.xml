@@ -28,7 +28,8 @@
      <Button
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:id="@+id/submit"/>
+        android:id="@+id/submit"
+        android:onClick="integralizar"/>
 
 
 </LinearLayout>

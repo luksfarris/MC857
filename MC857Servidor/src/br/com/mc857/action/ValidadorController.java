@@ -23,7 +23,7 @@ public class ValidadorController extends ActionSupport{
 
 	private static final long serialVersionUID = -8251392448200439157L;
 
-	private final String URL_BASE = "http://localhost:80//";
+	private final String URL_BASE = "http://localhost:81//";
 
 	private String ra;
 	private String atribuicaoString ;

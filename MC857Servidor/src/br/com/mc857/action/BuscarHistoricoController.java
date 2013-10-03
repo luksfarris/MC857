@@ -14,7 +14,7 @@ public class BuscarHistoricoController  extends ActionSupport{
 
 	private static final long serialVersionUID = -3644436651169638063L;
 
-	private final String URL_BASE = "http://localhost:80//";
+	private final String URL_BASE = "http://localhost:81//";
 
 	private String ra;
 

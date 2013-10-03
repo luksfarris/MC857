@@ -10,31 +10,32 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.br.unicamp.mc857ingrelizacaodac.R;
+import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
+import com.br.unicamp.mc857integralizacaodac.model.Historico;
+import com.br.unicamp.mc857integralizacaodac.utils.AppController;
 import com.br.unicamp.mc857integralizacaodac.utils.WebServiceInterface;
+import com.google.gson.Gson;
 
 public class MainActivity extends Activity {
 	
-	private Integer ra;
-	private Integer curso;
 	private EditText raField;
 	private EditText cursoField;
-	private Button integralizarButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		integralizarButton = (Button) findViewById(R.id.submit);
-		integralizarButton.setOnClickListener(calcularIntegralizacao);
+		raField = (EditText) findViewById(R.id.raField);
+		cursoField = (EditText) findViewById(R.id.cursoField);
 	}
-	
-	 private OnClickListener calcularIntegralizacao = new OnClickListener() {
-	        public void onClick(View v) {
-//	        	Toast.makeText(this, "My button was clicked", Toast.LENGTH_SHORT );
-//	        getContext().startActivity(new Intent(getContext(), ScreenshotActivity.class));
-	        }
-	    };  
+
+	    
+	public void integralizar(View view){
+		String ra = raField.getText().toString();
+		String curso = cursoField.getText().toString();
+		new LongOperation().execute(curso, ra);
+	}
 
 	
 	@Override
@@ -42,7 +43,6 @@ public class MainActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onResume();
 		
-		new LongOperation().execute("42");
 	}
 
 	@Override
@@ -66,8 +66,11 @@ public class MainActivity extends Activity {
         protected String doInBackground(String... params) {
       		WebServiceInterface ws = new WebServiceInterface();
     		Catalogo lixo =ws.requisitarCatalogo(params[0]);
-    		System.out.println(lixo);
-
+    		Historico hist = ws.requisitarHistorico(params[1]);
+    		AppController controler = new AppController(hist.getRa().toString(), hist.getCurso());
+    		Atribuicao attr = controler.gerarIntegralizacao(hist, lixo);
+    		String nois =new Gson().toJson(attr);
+    		
 
               return "Executed";
         }      

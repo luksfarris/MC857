@@ -228,7 +228,8 @@ public class AppController {
 			}
 		}
 		//agora tenho os grupos de eletivas que preciso preencher na lista "grupoDeEletivas"
-
+		this.historico = historico;
+		this.catalogo = catalogo;
 
 		// classifica as disciplinas
 		eletivas = classificar();
