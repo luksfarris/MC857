@@ -12,7 +12,7 @@ import com.br.unicamp.mc857integralizacaodac.model.Historico;
 
 public class WebServiceInterface {
 
-	private String URL_BASE = "http://10.0.2.2:8080/MC857Servidor/";
+	private String URL_BASE = "http://127.0.0.1:8080/MC857Servidor/";
 
 	private Boolean validarIntegralizacao(List<Atribuicao> atribuicoes,
 			String ra) {
@@ -23,9 +23,8 @@ public class WebServiceInterface {
 	public Catalogo requisitarCatalogo(String codigo) {
 		Catalogo cat = new Catalogo();
 		StringBuffer response = null;
+		
 		try {
-			
-			
 			String url = URL_BASE + "buscaCatalogo?cod=" + codigo;
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -53,7 +52,31 @@ public class WebServiceInterface {
 
 	public Historico requisitarHistorico(String ra) {
 		Historico hist = new Historico();
-		// TODO: implementar
+		StringBuffer response = null;
+		
+		try {
+			String url = URL_BASE + "buscaHistorico?ra=" + ra;
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+			con.setRequestMethod("GET");
+
+			con.setRequestProperty("User-Agent", "");
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					con.getInputStream()));
+			String inputLine;
+			response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		hist = Parser.parseHistorico(response.toString());
 		return hist;
 	}
 

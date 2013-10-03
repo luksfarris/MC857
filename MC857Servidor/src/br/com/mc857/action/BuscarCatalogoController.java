@@ -14,7 +14,7 @@ public class BuscarCatalogoController extends ActionSupport{
 	
 	private static final long serialVersionUID = 829854663838076499L;
 
-	private final String URL_BASE = "http://localhost:80//";
+	private final String URL_BASE = "http://localhost:81//";
 	
 	private String cod;
 	

@@ -33,7 +33,7 @@ public class ValidadorController extends ActionSupport{
 		return inputStream;
 	}
 
-	@Action(value = "buscaCatalogo", results = {
+	@Action(value = "valida", results = {
 			@Result( type="stream", name=SUCCESS)}
 			)
 	public String valida(){
