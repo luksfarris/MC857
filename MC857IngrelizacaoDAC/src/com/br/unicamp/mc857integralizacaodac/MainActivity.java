@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
 
 	    
 	public void integralizar(View view){
+		System.out.println("teste");
 		String ra = raField.getText().toString();
 		String curso = cursoField.getText().toString();
 		new LongOperation().execute(curso, ra);
@@ -42,7 +43,6 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		
 	}
 
 	@Override
@@ -65,19 +65,19 @@ public class MainActivity extends Activity {
         @Override
         protected String doInBackground(String... params) {
       		WebServiceInterface ws = new WebServiceInterface();
-    		Catalogo lixo =ws.requisitarCatalogo(params[0]);
+    		Catalogo catalogo =ws.requisitarCatalogo(params[0]);
     		Historico hist = ws.requisitarHistorico(params[1]);
     		AppController controler = new AppController(hist.getRa().toString(), hist.getCurso());
-    		Atribuicao attr = controler.gerarIntegralizacao(hist, lixo);
-    		String nois =new Gson().toJson(attr);
-    		
+    		Atribuicao atr = controler.gerarIntegralizacao(hist, catalogo);
+    		String atrString =new Gson().toJson(atr);
+    		System.out.println(atrString);
 
               return "Executed";
         }      
 
         @Override
         protected void onPostExecute(String result) {
-              //might want to change "executed" for the returned string passed into onPostExecute() but that is upto you
+             
         }
 
         @Override

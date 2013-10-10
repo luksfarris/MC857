@@ -35,7 +35,9 @@ public class Parser {
 			NodeList nHist = doc.getElementsByTagName("historico");
 			hist.setCurso(Integer.valueOf(((Element)nHist.item(0)).getAttribute("curso")));
 			hist.setNome((((Element)nHist.item(0)).getAttribute("nome")));
+			hist.setModalidade((((Element)nHist.item(0)).getAttribute("modalidade")));
 			hist.setRa(Integer.valueOf(((Element)nHist.item(0)).getAttribute("ra")));
+			
 
 			for (int temp = 0; temp < nList.getLength(); temp++) {
 

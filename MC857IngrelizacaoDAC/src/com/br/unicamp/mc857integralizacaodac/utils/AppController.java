@@ -2,6 +2,9 @@ package com.br.unicamp.mc857integralizacaodac.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import android.util.Log;
 
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
@@ -42,8 +45,6 @@ public class AppController {
 		o RA e o curso devem ser válidos
 		ensure
 		os atributos Catalogo e Historico foram preenchidos (não são nulos)*/
-		assert (ra.length()>0) : "ra não pode ser nulo";
-		assert (curso > 0) : "curso inválido";
 		WebServiceInterface web = new WebServiceInterface();
 		this.setHistorico(web.requisitarHistorico(ra));
 		this.setCatalogo(web.requisitarCatalogo(String.valueOf(curso)));
@@ -127,6 +128,7 @@ public class AppController {
 	}
 
 	private boolean tenta(Integer i){
+		Log.d("andando", i+"");
 		if(jaTemosSolucao()){
 			return true;
 		}
@@ -173,6 +175,9 @@ public class AppController {
 		if(catalogo.getModalidades() != null) {
 			Modalidade modalidade = new Modalidade();
 			modalidade.setNome(historico.getModalidade());
+			if(atribuicao.getModalidades() == null){
+				atribuicao.setModalidades(new ArrayList<Modalidade>());
+			}
 			atribuicao.getModalidades().add(modalidade);
 		}
 
@@ -234,7 +239,7 @@ public class AppController {
 		// classifica as disciplinas
 		eletivas = classificar();
 		//as obrigatorias estao na atribuicao
-
+		Log.d("total", eletivas.size()+"");
 		boolean formou = tenta(0);
 		// preenche atribuicao
 
@@ -286,11 +291,13 @@ public class AppController {
 
 	private boolean isObrigatoriaModalidade (Disciplina disciplina) {
 		boolean isObrigatoria = false;
-		if(catalogo.getModalidades() != null) {
+		if(catalogo.getModalidades() != null) {//32 17
 			for (Modalidade modalidade : catalogo.getModalidades()) {
-				if (historico.getModalidade().equalsIgnoreCase(modalidade.getNome())) {
-					if (modalidade.getDisciplinas().contains(disciplina)) {
-						isObrigatoria= true;
+				if(modalidade.getDisciplinas() != null && modalidade.getDisciplinas().size() > 0){
+					if(modalidade.getNome().toLowerCase(Locale.getDefault()).contains(historico.getModalidade().toLowerCase(Locale.getDefault()))) {
+						if (modalidade.getDisciplinas().contains(disciplina)) {
+							isObrigatoria= true;
+						}
 					}
 				}
 			}
