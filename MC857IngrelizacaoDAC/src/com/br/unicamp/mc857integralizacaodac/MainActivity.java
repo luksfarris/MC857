@@ -1,13 +1,18 @@
 package com.br.unicamp.mc857integralizacaodac;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.br.unicamp.mc857ingrelizacaodac.R;
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
@@ -21,6 +26,8 @@ public class MainActivity extends Activity {
 	
 	private EditText raField;
 	private EditText cursoField;
+	
+	private Boolean integralizou = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +35,8 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		raField = (EditText) findViewById(R.id.raField);
 		cursoField = (EditText) findViewById(R.id.cursoField);
+		
+		new LongOperation().execute("73", "028888");
 	}
 
 	    
@@ -52,12 +61,9 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	private void calcularIntegralizacao() {
-		// TODO: metodo que recebe do controller o resultado do c�lculo da integraliza��o e a exibe
-	}
-	
 	private void exibirResultado() {
-		// TODO: metodo que recebe do controller o resultado calculado e mostra ao usu�rio
+		Toast t = Toast.makeText(this, integralizou.toString(), Toast.LENGTH_LONG);
+		t.show();
 	}
 	
 	private class LongOperation extends AsyncTask<String, Void, String> {
@@ -65,19 +71,19 @@ public class MainActivity extends Activity {
         @Override
         protected String doInBackground(String... params) {
       		WebServiceInterface ws = new WebServiceInterface();
-    		Catalogo catalogo =ws.requisitarCatalogo(params[0]);
+      		Catalogo catalogo =ws.requisitarCatalogo(params[0]);
     		Historico hist = ws.requisitarHistorico(params[1]);
-    		AppController controler = new AppController(hist.getRa().toString(), hist.getCurso());
+    		AppController controler = new AppController(params[1], hist.getCurso());
     		Atribuicao atr = controler.gerarIntegralizacao(hist, catalogo);
-    		String atrString =new Gson().toJson(atr);
-    		System.out.println(atrString);
+    		
+    		integralizou = controler.validarIntegralizacao();
 
-              return "Executed";
+          return "Executed";
         }      
 
         @Override
         protected void onPostExecute(String result) {
-             
+        	exibirResultado();
         }
 
         @Override

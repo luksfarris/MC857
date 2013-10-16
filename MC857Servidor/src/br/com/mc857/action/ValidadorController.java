@@ -44,7 +44,6 @@ public class ValidadorController extends ActionSupport{
 		inputStream = new ByteArrayInputStream(formou.toString().getBytes());
 
 		return SUCCESS;
-
 	}
 
 	private Boolean validaIntegralizacao(Atribuicao atribuicao, String ra){
@@ -134,6 +133,22 @@ public class ValidadorController extends ActionSupport{
 		}
 		
 		return creditoFeito >= credito;
+	}
+
+	public String getRa() {
+		return ra;
+	}
+
+	public void setRa(String ra) {
+		this.ra = ra;
+	}
+
+	public String getAtribuicaoString() {
+		return atribuicaoString;
+	}
+
+	public void setAtribuicaoString(String atribuicaoString) {
+		this.atribuicaoString = atribuicaoString;
 	}
 
 }

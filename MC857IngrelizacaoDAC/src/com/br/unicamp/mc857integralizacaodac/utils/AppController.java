@@ -30,21 +30,11 @@ public class AppController {
 	}
 
 	public Boolean validarIntegralizacao(){
-		/* TODO: Método que retorna se e valida a integralização, dado um RA e uma integralizacao
-		require
-		o RA e a integralizacao devem ser válidos
-		ensure
-		a view será notificada com a resposta booleana do WebServiceMétodo que retorna se é válida a integralização, dado um RA e uma integralização*/
-		return true;
+		WebServiceInterface web = new WebServiceInterface();
+		return web.validarIntegralizacao(atribuicao, ra);
 	}
 
 	public void recuperarInformacoesDoServico(){
-
-		/* TODO: ­­ Método que preenche os atributos Catalogo e Historico vindo do WebService
-		require
-		o RA e o curso devem ser válidos
-		ensure
-		os atributos Catalogo e Historico foram preenchidos (não são nulos)*/
 		WebServiceInterface web = new WebServiceInterface();
 		this.setHistorico(web.requisitarHistorico(ra));
 		this.setCatalogo(web.requisitarCatalogo(String.valueOf(curso)));
@@ -62,10 +52,71 @@ public class AppController {
 		return true;
 	}
 
+	/**
+	 * Classifica uma disciplina de acordo com seu tipo
+	 * @param disciplina a disciplina a ser classificada
+	 * @param atribuicao
+	 */
+	public ArrayList<Disciplina> classificar() {
+
+		// cria lista de eletivas
+		ArrayList<Disciplina> eletivas = new ArrayList<Disciplina>();
+
+		// pra cada disciplina do catalogo
+		for (Disciplina disciplina : historico.getDisciplinas()) {
+			// cria uma atribuicao da disciplina
+			Disciplina atribuida = new Disciplina();
+			atribuida.setSigla(disciplina.getSigla());
+			atribuida.setCredito(disciplina.getCredito());
+			// checa se ela eh obrigatoria do curso
+			if (catalogo.getDisciplinas().contains(disciplina)) {
+				//se sim, adiciona na atribuicao
+				if(atribuicao.getDisciplinas() == null) {
+					atribuicao.setDisciplinas(new ArrayList<Disciplina>());
+				}
+				atribuicao.getDisciplinas().add(atribuida);
+			}
+			// checa se eh obrigatoria da modalidade
+			else if (isObrigatoriaModalidade(disciplina)) {
+				// se sim, adiciona na atribuicao
+				if(atribuicao.getModalidades() == null) {
+					atribuicao.setModalidades(new ArrayList<Modalidade>());
+					atribuicao.getModalidades().add(new Modalidade());
+				}
+				if(atribuicao.getModalidades().get(0).getDisciplinas() == null){
+					atribuicao.getModalidades().get(0).setDisciplinas(new ArrayList<Disciplina>());
+				}
+				atribuicao.getModalidades().get(0).getDisciplinas().add(atribuida);
+			} else {
+				// adiciona na lista de eletivas
+				System.out.println(atribuida.getSigla() + " " + atribuida.getCredito().toString());
+				eletivas.add(atribuida);
+			}
+		}
+		return eletivas;
+	}
+
+
+	private boolean isObrigatoriaModalidade (Disciplina disciplina) {
+		boolean isObrigatoria = false;
+		if(catalogo.getModalidades() != null) {//32 17
+			for (Modalidade modalidade : catalogo.getModalidades()) {
+				if(modalidade.getDisciplinas() != null && modalidade.getDisciplinas().size() > 0){
+					if(modalidade.getNome().toLowerCase(Locale.getDefault()).contains(historico.getModalidade().toLowerCase(Locale.getDefault()))) {
+						if (modalidade.getDisciplinas().contains(disciplina)) {
+							isObrigatoria= true;
+						}
+					}
+				}
+			}
+		}
+		return isObrigatoria;
+	}
+	
 	private void associa(Disciplina disciplina, GrupoEletiva grupo){
 		grupo.setCreditosFeitos(grupo.getCreditosFeitos()+disciplina.getCredito());
 
-		boolean frag = false;
+		boolean flag = false;
 		//procura grupo nas eletivas do curso
 		for(GrupoEletiva ge : atribuicao.getGrupos()){
 			if(ge.getId() == grupo.getId()){
@@ -73,12 +124,12 @@ public class AppController {
 					ge.setDisciplinas(new ArrayList<Disciplina>());
 				}
 				ge.getDisciplinas().add(disciplina);
-				frag = true;
+				flag = true;
 				break;
 			}
 		}
 		//procura na modalidade
-		if(!frag){
+		if(!flag){
 			for(GrupoEletiva ge : atribuicao.getModalidades().get(0).getGrupos()){
 				if(ge.getId() == grupo.getId()){
 					ge.getDisciplinas().add(disciplina);
@@ -128,7 +179,6 @@ public class AppController {
 	}
 
 	private boolean tenta(Integer i){
-		Log.d("andando", i+"");
 		if(jaTemosSolucao()){
 			return true;
 		}
@@ -142,7 +192,9 @@ public class AppController {
 				if(!achou){
 					associa(disciplinaAtual, grupo);
 					achou = tenta(i+1);
-					dissocia(disciplinaAtual, grupo);
+					if(!achou){
+						dissocia(disciplinaAtual, grupo);
+					}
 				}
 			}
 		}
@@ -159,15 +211,6 @@ public class AppController {
 	 * @return uma atribuicao de disciplinas
 	 */
 	public Atribuicao gerarIntegralizacao(Historico historico, Catalogo catalogo) {
-		/* TODO: Metodo responsavel por gerar a integralizacao a partir dos dados obtidos nos webservices
-		require
-		o historico e o catalogo devem ser validos
-		ensure
-		Todas as disciplinas do historico foram alocadas*/
-
-		assert (null != catalogo) : "historico não pode ser nulo";
-		assert (null != historico) : "catalogo não pode ser nulo";
-
 		atribuicao = new Atribuicao();
 		atribuicao.setCodigo(catalogo.getCodigo());
 		atribuicao.setNome(catalogo.getNome());
@@ -207,6 +250,9 @@ public class AppController {
 				atribuicao.getGrupos().add(gAtr);
 			}
 		}
+		else{
+			grupoDeEletivas = new ArrayList<GrupoEletiva>();
+		}
 		if(catalogo.getModalidades() != null) {
 			for(Modalidade mod : catalogo.getModalidades()){
 				if(mod.getNome().equals(historico.getModalidade())){
@@ -242,67 +288,10 @@ public class AppController {
 		Log.d("total", eletivas.size()+"");
 		boolean formou = tenta(0);
 		// preenche atribuicao
+		atribuicao.setIntegral(formou);
 
 
 		return atribuicao;
-	}
-
-	/**
-	 * Classifica uma disciplina de acordo com seu tipo
-	 * @param disciplina a disciplina a ser classificada
-	 * @param atribuicao
-	 */
-	public ArrayList<Disciplina> classificar() {
-
-		// cria lista de eletivas
-		ArrayList<Disciplina> eletivas = new ArrayList<Disciplina>();
-
-		// pra cada disciplina do catalogo
-		for (Disciplina disciplina : historico.getDisciplinas()) {
-			// cria uma atribuicao da disciplina
-			Disciplina atribuida = new Disciplina();
-			atribuida.setSigla(disciplina.getSigla());
-			atribuida.setCredito(disciplina.getCredito());
-			// checa se ela eh obrigatoria do curso
-			if (catalogo.getDisciplinas().contains(disciplina)) {
-				//se sim, adiciona na atribuicao
-				if(atribuicao.getDisciplinas() == null) {
-					atribuicao.setDisciplinas(new ArrayList<Disciplina>());
-				}
-				atribuicao.getDisciplinas().add(atribuida);
-			}
-			// checa se eh obrigatoria da modalidade
-			else if (isObrigatoriaModalidade(disciplina)) {
-				// se sim, adiciona na atribuicao
-				if(atribuicao.getModalidades() == null) {
-					atribuicao.setModalidades(new ArrayList<Modalidade>());
-					atribuicao.getModalidades().add(new Modalidade());
-				}
-				atribuicao.getModalidades().get(0).getDisciplinas().add(atribuida);
-			} else {
-				// adiciona na lista de eletivas
-				System.out.println(atribuida.getSigla() + " " + atribuida.getCredito().toString());
-				eletivas.add(atribuida);
-			}
-		}
-		return eletivas;
-	}
-
-
-	private boolean isObrigatoriaModalidade (Disciplina disciplina) {
-		boolean isObrigatoria = false;
-		if(catalogo.getModalidades() != null) {//32 17
-			for (Modalidade modalidade : catalogo.getModalidades()) {
-				if(modalidade.getDisciplinas() != null && modalidade.getDisciplinas().size() > 0){
-					if(modalidade.getNome().toLowerCase(Locale.getDefault()).contains(historico.getModalidade().toLowerCase(Locale.getDefault()))) {
-						if (modalidade.getDisciplinas().contains(disciplina)) {
-							isObrigatoria= true;
-						}
-					}
-				}
-			}
-		}
-		return isObrigatoria;
 	}
 
 	public Historico getHistorico() {
