@@ -7,5 +7,7 @@
     <string name="welcome_msg">Calcule sua integralização!</string>
     <string name="ra_hint">Número do RA</string>
     <string name="curso_hint">Número do curso</string>
+    <string name="submit">Calcular</string>
+    <string name="image">Imagem</string>
 
 </resources>
