@@ -1,26 +1,20 @@
 package com.br.unicamp.mc857integralizacaodac;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.br.unicamp.mc857ingrelizacaodac.R;
-import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
 import com.br.unicamp.mc857integralizacaodac.model.Historico;
 import com.br.unicamp.mc857integralizacaodac.utils.AppController;
 import com.br.unicamp.mc857integralizacaodac.utils.WebServiceInterface;
-import com.google.gson.Gson;
 
 public class MainActivity extends Activity {
 	
@@ -35,8 +29,15 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		raField = (EditText) findViewById(R.id.raField);
 		cursoField = (EditText) findViewById(R.id.cursoField);
+		Button submit = (Button) findViewById(R.id.submit);
 		
-		new LongOperation().execute("73", "028888");
+		submit.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				integralizar(v);
+			}
+		});
+		
 	}
 
 	    
@@ -44,7 +45,13 @@ public class MainActivity extends Activity {
 		System.out.println("teste");
 		String ra = raField.getText().toString();
 		String curso = cursoField.getText().toString();
-		new LongOperation().execute(curso, ra);
+		
+		if (ra.length() < 3 || curso.length() < 1 || !ra.matches("[0-9]+") || !curso.matches("[0-9]+")) {
+			Toast t = Toast.makeText(this, "Preencha corretamente os campos.", Toast.LENGTH_LONG);
+			t.show();
+		} else {
+			new LongOperation().execute(curso, ra);
+		}
 	}
 
 	
@@ -71,11 +78,17 @@ public class MainActivity extends Activity {
         @Override
         protected String doInBackground(String... params) {
       		WebServiceInterface ws = new WebServiceInterface();
-      		Catalogo catalogo =ws.requisitarCatalogo(params[0]);
+      		Catalogo catalogo = ws.requisitarCatalogo(params[0]);
+      		if (catalogo == null) {
+      			return null;
+      		}
     		Historico hist = ws.requisitarHistorico(params[1]);
-    		AppController controler = new AppController(params[1], hist.getCurso());
-    		Atribuicao atr = controler.gerarIntegralizacao(hist, catalogo);
+    		if (hist == null) {
+    			return null;
+    		}
     		
+    		AppController controler = new AppController(params[1], hist.getCurso());
+    		controler.gerarIntegralizacao(hist, catalogo);    		
     		integralizou = controler.validarIntegralizacao();
 
           return "Executed";
@@ -83,7 +96,12 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-        	exibirResultado();
+        	if (result != null) {
+        		exibirResultado();
+        	} else {
+        		Toast t = Toast.makeText(MainActivity.this, "Ocorreu um erro de conexão.", Toast.LENGTH_LONG);
+        		t.show();
+        	}
         }
 
         @Override
