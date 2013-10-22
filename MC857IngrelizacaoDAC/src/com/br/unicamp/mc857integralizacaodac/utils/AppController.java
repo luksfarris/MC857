@@ -19,10 +19,13 @@ public class AppController {
 	private Catalogo catalogo;
 	private String ra;
 	private int curso;
+	private int totalCreditosMelhor;
+	private int totalCreditosCorrente;
 
 	private List<Disciplina> eletivas;
 	private List<GrupoEletiva> grupoDeEletivas;
 	private Atribuicao atribuicao;
+	private Atribuicao melhorAtribuicao;
 
 	public AppController(String ra, int curso){
 		this.ra = ra;
@@ -114,6 +117,15 @@ public class AppController {
 	}
 	
 	private void associa(Disciplina disciplina, GrupoEletiva grupo){
+		
+		if(grupo.getCreditosFeitos() - grupo.getCredito() < disciplina.getCredito()) {
+			disciplina.setCreditosUsados(grupo.getCreditosFeitos() - grupo.getCredito());
+			totalCreditosCorrente -= grupo.getCreditosFeitos() - grupo.getCredito();
+		} else {
+			disciplina.setCreditosUsados(disciplina.getCredito());
+			totalCreditosCorrente -= disciplina.getCredito();
+		}
+		
 		grupo.setCreditosFeitos(grupo.getCreditosFeitos()+disciplina.getCredito());
 
 		boolean flag = false;
@@ -137,9 +149,21 @@ public class AppController {
 				}
 			}
 		}
+		
+		if(totalCreditosCorrente < totalCreditosMelhor) {
+			try {
+				melhorAtribuicao = (Atribuicao)atribuicao.clone();
+				totalCreditosMelhor = totalCreditosCorrente;
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void dissocia(Disciplina disciplina, GrupoEletiva grupo){
+		totalCreditosCorrente += disciplina.getCreditosUsados();
+		
 		grupo.setCreditosFeitos(grupo.getCreditosFeitos()-disciplina.getCredito());
 
 		boolean frag = false;
@@ -227,6 +251,8 @@ public class AppController {
 		int contador = 1;
 		if(catalogo.getGrupos() != null) {
 			for(GrupoEletiva gr : catalogo.getGrupos()){
+				totalCreditosMelhor += gr.getCredito();
+				
 				gr.setId(contador++);
 				GrupoEletiva grupo = new GrupoEletiva();
 				grupo.setCredito(gr.getCredito());
@@ -257,6 +283,8 @@ public class AppController {
 			for(Modalidade mod : catalogo.getModalidades()){
 				if(mod.getNome().equals(historico.getModalidade())){
 					for(GrupoEletiva gr : mod.getGrupos()){
+						totalCreditosMelhor += gr.getCredito();
+						
 						gr.setId(contador++);
 						GrupoEletiva grupo = new GrupoEletiva();
 						grupo.setCredito(gr.getCredito());
@@ -278,6 +306,7 @@ public class AppController {
 				}
 			}
 		}
+		totalCreditosCorrente = totalCreditosMelhor;
 		//agora tenho os grupos de eletivas que preciso preencher na lista "grupoDeEletivas"
 		this.historico = historico;
 		this.catalogo = catalogo;

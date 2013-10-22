@@ -4,6 +4,8 @@ public class Disciplina {
 	private String sigla;
 	private Integer credito;
 	
+	private Integer creditosUsados;
+	
 	public String getSigla() {
 		return sigla;
 	}
@@ -17,6 +19,12 @@ public class Disciplina {
 		this.credito = credito;
 	}
 	
+	public Integer getCreditosUsados() {
+		return creditosUsados;
+	}
+	public void setCreditosUsados(Integer creditosUsados) {
+		this.creditosUsados = creditosUsados;
+	}
 	@Override
 	public String toString() {
 		return this.sigla;

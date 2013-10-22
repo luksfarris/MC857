@@ -1,15 +1,10 @@
 package com.br.unicamp.mc857integralizacaodac.utils;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-
-import android.text.TextUtils;
-import android.util.Log;
+import java.util.List;
 
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
@@ -18,16 +13,19 @@ import com.google.gson.Gson;
 
 public class WebServiceInterface {
 
+	private String URL_BASE = "http://ec2-54-200-200-56.us-west-2.compute.amazonaws.com:8080/MC857Servidor/";
+
 	public Boolean validarIntegralizacao(Atribuicao atribuicao, String ra) {
 		StringBuffer response = null;
 		
 		try {
-			String url = Constants.URL_BASE + "valida?atribuicaoString=" + new Gson().toJson(atribuicao) + "&ra=" + ra;
-			url = TextUtils.htmlEncode(url);
+			String url = URL_BASE + "valida?atribuicaoString=" + new Gson().toJson(atribuicao) + "&ra=" + ra;
+			url = url.replace(" ", "%20");
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
 			con.setRequestMethod("GET");
+
 			con.setRequestProperty("User-Agent", "");
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -46,15 +44,16 @@ public class WebServiceInterface {
 	}
 
 	public Catalogo requisitarCatalogo(String codigo) {
-		Catalogo cat = null;
+		Catalogo cat = new Catalogo();
 		StringBuffer response = null;
 		
 		try {
-			String url = Constants.URL_BASE + "buscaCatalogo?cod=" + codigo;
+			String url = URL_BASE + "buscaCatalogo?cod=" + codigo;
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-			
+
 			con.setRequestMethod("GET");
+
 			con.setRequestProperty("User-Agent", "");
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -66,25 +65,11 @@ public class WebServiceInterface {
 				response.append(inputLine);
 			}
 			in.close();
-			
-			if (response != null) {
-				cat = Parser.parseCatalogo(response.toString());
-			}
-			
-		} catch (FileNotFoundException e) {
-			// TODO: mostar o erro de conexao pro usuario
-			Log.e("WebServiceInterface", "Erro de conexão.", e);
-		} catch (MalformedURLException e) {
-			// TODO: mostar o erro de conexao pro usuario
-			Log.e("WebServiceInterface", "Erro de conexão.", e);
-		} catch (IOException e) {
-			// TODO: mostar o erro de conexao pro usuario
-			Log.e("WebServiceInterface", "Erro de conexão.", e);
-		} catch (NullPointerException e) {
-			// TODO: mostar o erro de conexao pro usuario
-			Log.e("WebServiceInterface", "Erro de conexão.", e);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
+		cat = Parser.parseCatalogo(response.toString());
 		return cat;
 	}
 
@@ -93,7 +78,7 @@ public class WebServiceInterface {
 		StringBuffer response = null;
 		
 		try {
-			String url = Constants.URL_BASE + "buscaHistorico?ra=" + ra;
+			String url = URL_BASE + "buscaHistorico?ra=" + ra;
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
@@ -110,22 +95,11 @@ public class WebServiceInterface {
 				response.append(inputLine);
 			}
 			in.close();
-			
-			if (response != null) {
-				hist = Parser.parseHistorico(response.toString());				
-			}
-			
-		} catch (FileNotFoundException e) {
-			// TODO: mostar o erro de conexao pro usuario
-			Log.e("WebServiceInterface", "Erro de conexão.", e);
-		} catch (MalformedURLException e) {
-			// TODO: mostar o erro de conexao pro usuario
-			Log.e("WebServiceInterface", "Erro de conexão.", e);
-		} catch (IOException e) {
-			// TODO: mostar o erro de conexao pro usuario
-			Log.e("WebServiceInterface", "Erro de conexão.", e);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
+		hist = Parser.parseHistorico(response.toString());
 		return hist;
 	}
 

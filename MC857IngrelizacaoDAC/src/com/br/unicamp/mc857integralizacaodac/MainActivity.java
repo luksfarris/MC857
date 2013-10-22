@@ -1,16 +1,16 @@
 package com.br.unicamp.mc857integralizacaodac;
 
-
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.br.unicamp.mc857ingrelizacaodac.R;
+import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
 import com.br.unicamp.mc857integralizacaodac.model.Historico;
 import com.br.unicamp.mc857integralizacaodac.utils.AppController;
@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
 	
 	private EditText raField;
 	private EditText cursoField;
+	ProgressDialog dialog;
 	
 	private Boolean integralizou = false;
 
@@ -29,29 +30,14 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		raField = (EditText) findViewById(R.id.raField);
 		cursoField = (EditText) findViewById(R.id.cursoField);
-		Button submit = (Button) findViewById(R.id.submit);
-		
-		submit.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				integralizar(v);
-			}
-		});
-		
 	}
 
 	    
 	public void integralizar(View view){
-		System.out.println("teste");
 		String ra = raField.getText().toString();
 		String curso = cursoField.getText().toString();
-		
-		if (ra.length() < 3 || curso.length() < 1 || !ra.matches("[0-9]+") || !curso.matches("[0-9]+")) {
-			Toast t = Toast.makeText(this, "Preencha corretamente os campos.", Toast.LENGTH_LONG);
-			t.show();
-		} else {
-			new LongOperation().execute(curso, ra);
-		}
+		dialog = ProgressDialog.show(this, "Integralizando...", "Aguarde enquanto processamos a integralização...");
+		new LongOperation().execute(curso, ra);
 	}
 
 	
@@ -78,30 +64,18 @@ public class MainActivity extends Activity {
         @Override
         protected String doInBackground(String... params) {
       		WebServiceInterface ws = new WebServiceInterface();
-      		Catalogo catalogo = ws.requisitarCatalogo(params[0]);
-      		if (catalogo == null) {
-      			return null;
-      		}
+      		Catalogo catalogo =ws.requisitarCatalogo(params[0]);
     		Historico hist = ws.requisitarHistorico(params[1]);
-    		if (hist == null) {
-    			return null;
-    		}
-    		
     		AppController controler = new AppController(params[1], hist.getCurso());
-    		controler.gerarIntegralizacao(hist, catalogo);    		
+    		Atribuicao atr = controler.gerarIntegralizacao(hist, catalogo);
     		integralizou = controler.validarIntegralizacao();
-
           return "Executed";
         }      
 
         @Override
         protected void onPostExecute(String result) {
-        	if (result != null) {
-        		exibirResultado();
-        	} else {
-        		Toast t = Toast.makeText(MainActivity.this, "Ocorreu um erro de conexão.", Toast.LENGTH_LONG);
-        		t.show();
-        	}
+        	exibirResultado();
+        	dialog.dismiss();
         }
 
         @Override
