@@ -1,6 +1,8 @@
 package com.br.unicamp.mc857integralizacaodac.utils;
 
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -21,11 +23,17 @@ public class AppController {
 	private int curso;
 	private int totalCreditosMelhor;
 	private int totalCreditosCorrente;
+	private int counter=0;
+	
+	private HashMap<Integer, Boolean> mapNois = new HashMap<Integer, Boolean>();
 
 	private List<Disciplina> eletivas;
 	private List<GrupoEletiva> grupoDeEletivas;
 	private Atribuicao atribuicao;
 	private Atribuicao melhorAtribuicao;
+	
+	private Integer[] testes;
+	private  HashMap<String, Boolean> tabelaDinamica = new HashMap<String, Boolean>();
 
 	public AppController(String ra, int curso){
 		this.ra = ra;
@@ -67,6 +75,14 @@ public class AppController {
 
 		// pra cada disciplina do catalogo
 		for (Disciplina disciplina : historico.getDisciplinas()) {
+			
+			if(disciplina.getSigla().equalsIgnoreCase("HZ201") ||
+					disciplina.getSigla().equalsIgnoreCase("HH202") ||
+					disciplina.getSigla().equalsIgnoreCase("HZ202") ||
+					disciplina.getSigla().equalsIgnoreCase("HZ999")){
+				continue;
+			}
+			
 			// cria uma atribuicao da disciplina
 			Disciplina atribuida = new Disciplina();
 			atribuida.setSigla(disciplina.getSigla());
@@ -203,6 +219,8 @@ public class AppController {
 	}
 
 	private boolean tenta(Integer i){
+		counter++;
+		
 		if(jaTemosSolucao()){
 			return true;
 		}
@@ -218,10 +236,26 @@ public class AppController {
 					achou = tenta(i+1);
 					if(!achou){
 						dissocia(disciplinaAtual, grupo);
+					}else {
+						break;
 					}
 				}
 			}
 		}
+		
+		String hash = "";
+		for (int j=0; j<grupoDeEletivas.size(); j++){
+			
+		}
+		
+		testes[i] += 1;
+		String log = "";
+		for (int j=0;j<testes.length;j++){
+			log = log + testes[j] +",";
+		}
+		Log.d("log", log);
+		
+		
 		if(!achou){
 			achou = tenta(i+1);
 		}
@@ -315,6 +349,16 @@ public class AppController {
 		eletivas = classificar();
 		//as obrigatorias estao na atribuicao
 		Log.d("total", eletivas.size()+"");
+		
+		for(Integer x = 0; x < eletivas.size(); x++){
+			mapNois.put(x, false);
+		}
+		
+		testes = new Integer[eletivas.size()];
+		for (int i=0;i<eletivas.size();i++) {
+			testes[i]=0;
+		}
+		
 		boolean formou = tenta(0);
 		// preenche atribuicao
 		atribuicao.setIntegral(formou);
