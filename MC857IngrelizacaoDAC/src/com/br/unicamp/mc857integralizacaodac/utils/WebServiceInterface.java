@@ -40,6 +40,9 @@ public class WebServiceInterface {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		if(response== null) {
+			return null;
+		}
 		return response.toString().equalsIgnoreCase("true");
 	}
 

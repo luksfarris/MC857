@@ -1,6 +1,5 @@
 package com.br.unicamp.mc857integralizacaodac.utils;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +22,6 @@ public class AppController {
 	private int curso;
 	private int totalCreditosMelhor;
 	private int totalCreditosCorrente;
-	private int counter=0;
-	
-	private HashMap<Integer, Boolean> mapNois = new HashMap<Integer, Boolean>();
 
 	private List<Disciplina> eletivas;
 	private List<GrupoEletiva> grupoDeEletivas;
@@ -75,13 +71,6 @@ public class AppController {
 
 		// pra cada disciplina do catalogo
 		for (Disciplina disciplina : historico.getDisciplinas()) {
-			
-			if(disciplina.getSigla().equalsIgnoreCase("HZ201") ||
-					disciplina.getSigla().equalsIgnoreCase("HH202") ||
-					disciplina.getSigla().equalsIgnoreCase("HZ202") ||
-					disciplina.getSigla().equalsIgnoreCase("HZ999")){
-				continue;
-			}
 			
 			// cria uma atribuicao da disciplina
 			Disciplina atribuida = new Disciplina();
@@ -144,6 +133,12 @@ public class AppController {
 		
 		grupo.setCreditosFeitos(grupo.getCreditosFeitos()+disciplina.getCredito());
 
+		if (atribuicao == null) {
+			Log.e("log", "attr nula", new NullPointerException());
+		} else if (atribuicao.getGrupos() == null) {
+			Log.e("log", "attr nula", new NullPointerException());
+		}
+		
 		boolean flag = false;
 		//procura grupo nas eletivas do curso
 		for(GrupoEletiva ge : atribuicao.getGrupos()){
@@ -218,16 +213,34 @@ public class AppController {
 		}
 	}
 
-	private boolean tenta(Integer i){
-		counter++;
-		
+	public String currentHash (Integer i) {
+		String hash = i.toString()+",";
+		for (int j=0; j<grupoDeEletivas.size(); j++){
+			hash = hash+grupoDeEletivas.get(j).getCreditosFeitos().toString()+",";
+		}
+		return hash;
+	}
+	
+	
+	private Boolean tenta(Integer i){
 		if(jaTemosSolucao()){
 			return true;
 		}
 		if(i >= eletivas.size()){
 			return false;
 		}
-		boolean achou = false;
+		Boolean achou = false;
+		String hash = currentHash(i);
+		if(tabelaDinamica.containsKey(hash)) {
+			//Log.d("LUCAS", "cortou !! " + hash);
+			return tabelaDinamica.get(hash);
+		}
+		if (maisEletivasQueCreditos(i)) {
+			//Log.d("LUCAS", "corte logico");
+			tabelaDinamica.put(hash, achou);
+			return achou;
+		}
+		
 		Disciplina disciplinaAtual = eletivas.get(i);
 		for(GrupoEletiva grupo : grupoDeEletivas){
 			if(grupo.getDisciplinas().contains(disciplinaAtual) && grupo.getCreditosFeitos() < grupo.getCredito()){
@@ -243,18 +256,17 @@ public class AppController {
 			}
 		}
 		
-		String hash = "";
-		for (int j=0; j<grupoDeEletivas.size(); j++){
-			
-		}
 		
-		testes[i] += 1;
-		String log = "";
-		for (int j=0;j<testes.length;j++){
-			log = log + testes[j] +",";
-		}
-		Log.d("log", log);
+		//Log.d("LUCAS", "salvou " + hash + " como " + achou.toString());
+		tabelaDinamica.put(hash, achou);
 		
+//		testes[i] += 1;
+//		String log = "";
+//		for (int j=0;j<testes.length;j++){
+//			log = log + testes[j] +",";
+//		}
+//		Log.d("log", log);
+//		
 		
 		if(!achou){
 			achou = tenta(i+1);
@@ -262,6 +274,18 @@ public class AppController {
 		return achou;
 	}
 
+	public boolean maisEletivasQueCreditos (int i) {
+		int creditosSobrando = 0;
+		for (int j = i; j< eletivas.size(); j++){
+			creditosSobrando += eletivas.get(j).getCredito();
+		}
+		int creditosFaltando = 0;
+		for (int k=0; k<grupoDeEletivas.size(); k++) {
+			creditosFaltando += grupoDeEletivas.get(k).getCredito() - grupoDeEletivas.get(k).getCreditosFeitos();
+		}
+		return (creditosFaltando>creditosSobrando);
+	}
+	
 	/**
 	 * Gera a integralizacao do usuario, dados
 	 * @param historico um historico do aluno
@@ -312,10 +336,11 @@ public class AppController {
 		}
 		else{
 			grupoDeEletivas = new ArrayList<GrupoEletiva>();
+			atribuicao.setGrupos(new ArrayList<GrupoEletiva>());
 		}
 		if(catalogo.getModalidades() != null) {
 			for(Modalidade mod : catalogo.getModalidades()){
-				if(mod.getNome().equals(historico.getModalidade())){
+				if(mod.getNome().toLowerCase().contains(historico.getModalidade().toLowerCase())){
 					for(GrupoEletiva gr : mod.getGrupos()){
 						totalCreditosMelhor += gr.getCredito();
 						
@@ -350,16 +375,13 @@ public class AppController {
 		//as obrigatorias estao na atribuicao
 		Log.d("total", eletivas.size()+"");
 		
-		for(Integer x = 0; x < eletivas.size(); x++){
-			mapNois.put(x, false);
-		}
-		
 		testes = new Integer[eletivas.size()];
 		for (int i=0;i<eletivas.size();i++) {
 			testes[i]=0;
 		}
 		
 		boolean formou = tenta(0);
+		
 		// preenche atribuicao
 		atribuicao.setIntegral(formou);
 

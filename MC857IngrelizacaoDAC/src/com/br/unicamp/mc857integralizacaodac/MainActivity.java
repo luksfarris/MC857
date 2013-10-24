@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
@@ -55,8 +56,14 @@ public class MainActivity extends Activity {
 	}
 
 	private void exibirResultado() {
-		Toast t = Toast.makeText(this, integralizou.toString(), Toast.LENGTH_LONG);
-		t.show();
+		if (integralizou == null) {
+			Toast t = Toast.makeText(this,"Ocorreu um erro na validação" , Toast.LENGTH_LONG);
+			t.show();
+		} else {
+			Toast t = Toast.makeText(this, integralizou.toString(), Toast.LENGTH_LONG);
+			t.show();			
+		}
+			
 	}
 	
 	private class LongOperation extends AsyncTask<String, Void, String> {
@@ -68,7 +75,14 @@ public class MainActivity extends Activity {
     		Historico hist = ws.requisitarHistorico(params[1]);
     		AppController controler = new AppController(params[1], hist.getCurso());
     		Atribuicao atr = controler.gerarIntegralizacao(hist, catalogo);
-    		integralizou = controler.validarIntegralizacao();
+    		
+    		if (atr.isIntegral()) {    			
+    			integralizou = controler.validarIntegralizacao();
+    		} else {
+    			integralizou = false;
+    		}
+    		
+    		Log.d("FORMOU", integralizou.toString());
           return "Executed";
         }      
 
