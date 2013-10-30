@@ -24,6 +24,7 @@ public class MainActivity extends Activity {
 	private EditText raField;
 	private EditText cursoField;
 	ProgressDialog dialog;
+	AppController controller;
 	
 	private Boolean integralizou = false;
 
@@ -82,11 +83,11 @@ public class MainActivity extends Activity {
       		WebServiceInterface ws = new WebServiceInterface();
       		Catalogo catalogo =ws.requisitarCatalogo(params[0]);
     		Historico hist = ws.requisitarHistorico(params[1]);
-    		AppController controler = new AppController(params[1], hist.getCurso());
-    		Atribuicao atr = controler.gerarIntegralizacao(hist, catalogo);
+    		controller= new AppController(params[1], hist.getCurso());
+    		Atribuicao atr = controller.gerarIntegralizacao(hist, catalogo);
     		
     		if (atr.isIntegral()) {    			
-    			integralizou = controler.validarIntegralizacao();
+    			integralizou = controller.validarIntegralizacao();
     		} else {
     			integralizou = false;
     		}
