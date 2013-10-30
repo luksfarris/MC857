@@ -1,10 +1,14 @@
 package com.br.unicamp.mc857integralizacaodac.utils;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
+
+import android.util.Log;
 
 import com.br.unicamp.mc857integralizacaodac.model.Atribuicao;
 import com.br.unicamp.mc857integralizacaodac.model.Catalogo;
@@ -19,14 +23,15 @@ public class WebServiceInterface {
 		StringBuffer response = null;
 		
 		try {
-			String url = URL_BASE + "valida?atribuicaoString=" + new Gson().toJson(atribuicao) + "&ra=" + ra;
-			url = url.replace(" ", "%20");
+			String path = "valida?atribuicaoString=" + new Gson().toJson(atribuicao) + "&ra=" + ra;
+			path = path.replace(" ", "%20");
+			String url = URL_BASE + path;
 			URL obj = new URL(url);
 			
 			if (android.os.Build.VERSION.SDK_INT < 14) {
 				// ipv6 old android workaround
-				obj = new URL("GET", "ec2-54-200-200-56.us-west-2.compute.amazonaws.com", 8080, "MC857Servidor/"+
-						"valida?atribuicaoString=" + new Gson().toJson(atribuicao) + "&ra=" + ra);
+				obj = new URL("http", "ec2-54-200-200-56.us-west-2.compute.amazonaws.com", 8080, "/MC857Servidor/"+path);
+				url = obj.toString();
 			}
 			
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -44,10 +49,18 @@ public class WebServiceInterface {
 				response.append(inputLine);
 			}
 			in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+			
+		} catch (FileNotFoundException e) {
+			Log.e("WebServiceInterface", "Erro de conexão.", e);
+		} catch (MalformedURLException e) {
+			Log.e("WebServiceInterface", "Erro de conexão.", e);
+		} catch (IOException e) {
+			Log.e("WebServiceInterface", "Erro de conexão.", e);
+		} catch (NullPointerException e) {
+			Log.e("WebServiceInterface", "Erro de conexão.", e);
 		}
-		if(response== null) {
+
+		if(response == null) {
 			return null;
 		}
 		return response.toString().equalsIgnoreCase("true");

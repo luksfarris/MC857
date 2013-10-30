@@ -39,10 +39,16 @@ public class MainActivity extends Activity {
 	public void integralizar(View view){
 		String ra = raField.getText().toString();
 		String curso = cursoField.getText().toString();
-		dialog = ProgressDialog.show(this, "Integralizando...", "Aguarde enquanto processamos a integraliza��o...");
+		dialog = ProgressDialog.show(this, "Integralizando...", "Aguarde enquanto processamos a integralização...");
 		TextView resultado = (TextView) findViewById(R.id.resultado);
 		resultado.setVisibility(View.GONE);
-		new LongOperation().execute(curso, ra);
+		
+		if (ra.length() < 3 || curso.length() < 1 || !ra.matches("[0-9]+") || !curso.matches("[0-9]+")) {
+			Toast t = Toast.makeText(this, "Preencha corretamente os campos.", Toast.LENGTH_LONG);
+			t.show();
+		} else {
+			new LongOperation().execute(curso, ra);
+		}
 	}
 
 	
@@ -81,7 +87,13 @@ public class MainActivity extends Activity {
         protected String doInBackground(String... params) {
       		WebServiceInterface ws = new WebServiceInterface();
       		Catalogo catalogo =ws.requisitarCatalogo(params[0]);
+      		if (catalogo == null) {
+      			return null;
+      		}
     		Historico hist = ws.requisitarHistorico(params[1]);
+    		if (hist == null) {
+    			return null;
+    		}
     		AppController controler = new AppController(params[1], hist.getCurso());
     		Atribuicao atr = controler.gerarIntegralizacao(hist, catalogo);
     		
@@ -97,7 +109,12 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-        	exibirResultado();
+        	if (result != null) {
+        		exibirResultado();
+        	} else {
+        		Toast t = Toast.makeText(MainActivity.this, "Ocorreu um erro de conexão.", Toast.LENGTH_LONG);
+        		t.show();
+        	}
         	dialog.dismiss();
         }
 
