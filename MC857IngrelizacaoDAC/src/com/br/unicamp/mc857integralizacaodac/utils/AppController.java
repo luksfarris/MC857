@@ -26,7 +26,7 @@ public class AppController {
 	private List<Disciplina> eletivas;
 	private List<GrupoEletiva> grupoDeEletivas;
 	private Atribuicao atribuicao;
-	private Atribuicao melhorAtribuicao;
+	public Atribuicao melhorAtribuicao;
 	
 	private Integer[] testes;
 	private  HashMap<String, Boolean> tabelaDinamica = new HashMap<String, Boolean>();
@@ -123,9 +123,9 @@ public class AppController {
 	
 	private void associa(Disciplina disciplina, GrupoEletiva grupo){
 		
-		if(grupo.getCreditosFeitos() - grupo.getCredito() < disciplina.getCredito()) {
+		if(grupo.getCredito()- grupo.getCreditosFeitos() < disciplina.getCredito()) {
 			disciplina.setCreditosUsados(grupo.getCreditosFeitos() - grupo.getCredito());
-			totalCreditosCorrente -= grupo.getCreditosFeitos() - grupo.getCredito();
+			totalCreditosCorrente -= grupo.getCredito() -grupo.getCreditosFeitos() ;
 		} else {
 			disciplina.setCreditosUsados(disciplina.getCredito());
 			totalCreditosCorrente -= disciplina.getCredito();

@@ -37,7 +37,9 @@ public class MainActivity extends Activity {
 	public void integralizar(View view){
 		String ra = raField.getText().toString();
 		String curso = cursoField.getText().toString();
-		dialog = ProgressDialog.show(this, "Integralizando...", "Aguarde enquanto processamos a integralização...");
+		dialog = ProgressDialog.show(this, "Integralizando...", "Aguarde enquanto processamos a integralizaï¿½ï¿½o...");
+		TextView resultado = (TextView) findViewById(R.id.resultado);
+		resultado.setVisibility(View.GONE);
 		new LongOperation().execute(curso, ra);
 	}
 
@@ -56,13 +58,18 @@ public class MainActivity extends Activity {
 	}
 
 	private void exibirResultado() {
+		TextView resultado = (TextView) findViewById(R.id.resultado);
 		if (integralizou == null) {
-			Toast t = Toast.makeText(this,"Ocorreu um erro na validação" , Toast.LENGTH_LONG);
+			Toast t = Toast.makeText(this,"Ocorreu um erro na validaÃ§Ã£o" , Toast.LENGTH_LONG);
 			t.show();
-		} else {
-			Toast t = Toast.makeText(this, integralizou.toString(), Toast.LENGTH_LONG);
-			t.show();			
+		} else if(integralizou) {
+			resultado.setText("Integralizado!");
+			resultado.setTextColor(Color.BLUE);
+		}else{
+			resultado.setText("NÃ£o Integralizado!");
+			resultado.setTextColor(Color.RED);
 		}
+		resultado.setVisibility(View.VISIBLE);
 			
 	}
 	

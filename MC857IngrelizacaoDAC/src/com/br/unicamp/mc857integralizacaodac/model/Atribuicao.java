@@ -12,6 +12,7 @@ public class Atribuicao extends Catalogo implements Cloneable {
 		this.integral = integral;
 	}
 	
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}

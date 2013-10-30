@@ -53,6 +53,13 @@
         android:onClick="integralizar"
         android:textColor="#FFFFFF"
         android:text="@string/submit" />
+        
+            <TextView
+        android:id="@+id/resultado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:visibility="gone" />
     
 
 </LinearLayout>
