@@ -22,6 +22,13 @@ public class WebServiceInterface {
 			String url = URL_BASE + "valida?atribuicaoString=" + new Gson().toJson(atribuicao) + "&ra=" + ra;
 			url = url.replace(" ", "%20");
 			URL obj = new URL(url);
+			
+			if (android.os.Build.VERSION.SDK_INT < 14) {
+				// ipv6 old android workaround
+				obj = new URL("GET", "ec2-54-200-200-56.us-west-2.compute.amazonaws.com", 8080, "MC857Servidor/"+
+						"valida?atribuicaoString=" + new Gson().toJson(atribuicao) + "&ra=" + ra);
+			}
+			
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
 			con.setRequestMethod("GET");
