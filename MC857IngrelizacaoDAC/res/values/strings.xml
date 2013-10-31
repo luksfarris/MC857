@@ -9,5 +9,6 @@
     <string name="curso_hint">Número do curso</string>
     <string name="submit">Calcular</string>
     <string name="image">Imagem</string>
+    <string name="title_activity_result">ResultActivity</string>
 
 </resources>

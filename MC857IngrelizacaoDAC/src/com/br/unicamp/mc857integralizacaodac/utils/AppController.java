@@ -420,5 +420,9 @@ public class AppController {
 	public void setCatalogo(Catalogo catalogo) {
 		this.catalogo = catalogo;
 	}
+	
+	public Atribuicao getMelhorAtribuicao(){
+		return this.melhorAtribuicao;
+	}
 
 }
