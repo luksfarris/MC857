@@ -25,7 +25,7 @@ public class AppController {
 
 	private List<Disciplina> eletivas;
 	private List<GrupoEletiva> grupoDeEletivas;
-	private Atribuicao atribuicao;
+	public Atribuicao atribuicao;
 	public Atribuicao melhorAtribuicao;
 	
 	private Integer[] testes;
@@ -214,7 +214,7 @@ public class AppController {
 	}
 
 	public String currentHash (Integer i) {
-		String hash = i.toString()+",";
+		String hash = "";
 		for (int j=0; j<grupoDeEletivas.size(); j++){
 			hash = hash+grupoDeEletivas.get(j).getCreditosFeitos().toString()+",";
 		}
@@ -341,6 +341,7 @@ public class AppController {
 		if(catalogo.getModalidades() != null) {
 			for(Modalidade mod : catalogo.getModalidades()){
 				if(mod.getNome().toLowerCase().contains(historico.getModalidade().toLowerCase())){
+					if (mod.getGrupos() == null) continue;
 					for(GrupoEletiva gr : mod.getGrupos()){
 						totalCreditosMelhor += gr.getCredito();
 						
@@ -379,16 +380,29 @@ public class AppController {
 		for (int i=0;i<eletivas.size();i++) {
 			testes[i]=0;
 		}
-		
-		boolean formou = tenta(0);
-		
+		try {
+			melhorAtribuicao = (Atribuicao) atribuicao.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		boolean formou = tenta(0) && fezObrigatorias();
+
 		// preenche atribuicao
 		atribuicao.setIntegral(formou);
 
 
 		return atribuicao;
 	}
-
+	
+	public boolean fezObrigatorias () {
+		if (catalogo.getDisciplinas().size() != atribuicao.getDisciplinas().size()){
+			return false;
+		}
+		// TODO: verificar se fez obrigatorias da modalidade ?
+		return true;
+	}
+	
 	public Historico getHistorico() {
 		return historico;
 	}

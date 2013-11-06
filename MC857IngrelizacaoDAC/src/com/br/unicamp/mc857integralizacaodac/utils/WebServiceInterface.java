@@ -92,7 +92,11 @@ public class WebServiceInterface {
 			e.printStackTrace();
 		}
 		
-		cat = Parser.parseCatalogo(response.toString());
+		if (response != null) {
+			cat = Parser.parseCatalogo(response.toString());
+		}
+		
+		
 		return cat;
 	}
 
@@ -122,7 +126,9 @@ public class WebServiceInterface {
 			e.printStackTrace();
 		}
 		
-		hist = Parser.parseHistorico(response.toString());
+		if (response != null){
+			hist = Parser.parseHistorico(response.toString());
+		}
 		return hist;
 	}
 

@@ -112,14 +112,18 @@ public class MainActivity extends Activity {
     			integralizou = controller.validarIntegralizacao();
     		} else {
     			integralizou = false;
+    			String resposta = trataResposta(catalogo);
+    			Intent i = new Intent(MainActivity.this, ResultActivity.class);
+    			i.putExtra("resultado", resposta);
+    			startActivity(i);
     		}
     		
-    		Log.d("FORMOU", integralizou.toString());
+    		if (integralizou == null) {
+    			// TODO tratar erro
+    		} else {    			
+    			Log.d("FORMOU", integralizou.toString());
+    		}
 
-    		String resposta = trataResposta(catalogo);
-    		Intent i = new Intent(MainActivity.this, ResultActivity.class);
-    		i.putExtra("resultado", resposta);
-    		startActivity(i);
     		
           return "Executed";
         }      
@@ -151,14 +155,16 @@ public class MainActivity extends Activity {
     	
     	//TODO: APAGAR - DEBUG
     	if (controller == null)
-    		System.out.println("Controller null");
-    	if (melhorAtribuicao == null)
-    		System.out.println("Nao pegou melhor atribuicao : controller zuado.");
+    		System.out.println ("Controller null");
+    	if (melhorAtribuicao == null) {
+    		System.out.println ("Nao pegou melhor atribuicao : controller zuado.");
+    		melhorAtribuicao = controller.atribuicao;
+    	}
     	
     	Modalidade modalidade = null;
     	if (catalogo.getModalidades() != null && catalogo.getModalidades().size() > 0){
 	    	for (Modalidade mod: catalogo.getModalidades()){
-	    		if (mod.getNome().equals(melhorAtribuicao.getModalidades().get(0).getNome())){
+	    		if (mod.getNome().toLowerCase().contains((melhorAtribuicao.getModalidades().get(0).getNome().toLowerCase()))){
 	    			modalidade = mod;
 	    			break;
 	    		}
@@ -167,7 +173,7 @@ public class MainActivity extends Activity {
     	
     	//obrigatorios do curso
     	List<Disciplina> obrigatorias = listObrigatoriasRestantes(melhorAtribuicao.getDisciplinas(), catalogo.getDisciplinas());
-    	String resposta = obrigatorias.size() + " créditos obrigatórios do curso faltantes <br/>" ;
+    	String resposta = obrigatorias.size() + " disciplinas obrigatÃ³rias do curso faltantes \n" ;
     	for (Disciplina obrg : obrigatorias) {
     		resposta += obrg.getSigla() + " ";
     	}
@@ -175,10 +181,12 @@ public class MainActivity extends Activity {
     	//eletivas do curso
     	for(GrupoEletiva grupoFeito : melhorAtribuicao.getGrupos()){
 			for(GrupoEletiva grupoNecessario : catalogo.getGrupos()) {
-				String eletivas = eletivasRestantes(grupoFeito.getDisciplinas(), grupoNecessario.getDisciplinas(), grupoNecessario.getCredito());
-				resposta += eletivas;
-			    if(eletivas.equals("")){
-					break;
+				if (grupoFeito.getId() == grupoNecessario.getId()) {
+					String eletivas = eletivasRestantes(grupoFeito.getDisciplinas(), grupoNecessario.getDisciplinas(), grupoNecessario.getCredito());
+					resposta += eletivas;
+				    if(eletivas.equals("")){
+						break;
+					}
 				}
 			}
 			
@@ -187,27 +195,36 @@ public class MainActivity extends Activity {
     	//obrigatorios da modalidade
     	if (modalidade != null){
     		List<Disciplina> obrigatoriasMod = listObrigatoriasRestantes(melhorAtribuicao.getModalidades().get(0).getDisciplinas(), modalidade.getDisciplinas());
-    		resposta += "<br/>" + obrigatoriasMod.size() + " créditos obrigatórios da modalidade faltantes <br/>" ;
+    		resposta += "\n" + obrigatoriasMod.size() + " disciplinas obrigatÃ³rias da modalidade faltantes \n" ;
     		for (Disciplina obrg : obrigatoriasMod) {
     			resposta += obrg.getSigla() + " ";
     		}
     		
     		//eletivas da modalidade
-	    	for(GrupoEletiva grupoFeito : melhorAtribuicao.getModalidades().get(0).getGrupos()){
-				for(GrupoEletiva grupoNecessario : modalidade.getGrupos()) {
-					String eletivasMod = eletivasRestantes(grupoFeito.getDisciplinas(), grupoNecessario.getDisciplinas(), grupoNecessario.getCredito());
-					resposta += eletivasMod;
-				    if(eletivasMod.equals("")){
-						break;
+    		if (melhorAtribuicao.getModalidades().get(0) != null) {
+	    		if (melhorAtribuicao.getModalidades().get(0).getGrupos() != null) {
+			    	for(GrupoEletiva grupoFeito : melhorAtribuicao.getModalidades().get(0).getGrupos()){
+						for(GrupoEletiva grupoNecessario : modalidade.getGrupos()) {
+							if (grupoFeito.getId() == grupoNecessario.getId()) {
+								String eletivasMod = eletivasRestantes(grupoFeito.getDisciplinas(), grupoNecessario.getDisciplinas(), grupoNecessario.getCredito());
+								resposta += eletivasMod;
+							    if(eletivasMod.equals("")){
+									break;
+								}
+							}
+						}
 					}
-				}
-			}
+	    		}
+    		}
     	}
     	System.out.println(resposta);
     	return resposta;
     }
     
     private List<Disciplina> listObrigatoriasRestantes(List<Disciplina> feitas, List<Disciplina> necessarias){
+    	if (feitas==null && necessarias == null) {
+    		return new ArrayList<Disciplina>();
+    	}
 		if(feitas.size() == necessarias.size()) {
 			return new ArrayList<Disciplina>();
 		}
@@ -227,7 +244,12 @@ public class MainActivity extends Activity {
     
     private String eletivasRestantes(List<Disciplina> feitas, List<Disciplina> necessarias, int credito){
 		String eletivas = "";
-		
+		if(feitas == null) {
+			feitas = new ArrayList<Disciplina>();
+		}
+		if(necessarias ==null){
+			necessarias = new ArrayList<Disciplina>();
+		}
     	int creditoFeito = 0;
 		for(Disciplina feita : feitas){
 			if(necessarias.contains(feita)){
@@ -237,7 +259,7 @@ public class MainActivity extends Activity {
 		
 		int creditoFaltante = credito - creditoFeito;
 		if (creditoFaltante > 0){
-			eletivas += "<br/>" + creditoFaltante + " créditos faltantes dentre as disciplinas: <br/>";
+			eletivas += "\n" + creditoFaltante + " crÃ©ditos faltantes dentre as disciplinas: \n";
 			for (Disciplina n : necessarias){
 				eletivas += n.getSigla() + " ";
 			}
