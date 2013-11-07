@@ -1,8 +1,6 @@
 package com.br.unicamp.mc857integralizacaodac;
 
 import com.br.unicamp.mc857ingrelizacaodac.R;
-import com.br.unicamp.mc857ingrelizacaodac.R.layout;
-import com.br.unicamp.mc857ingrelizacaodac.R.menu;
 
 import android.os.Bundle;
 import android.app.Activity;

@@ -153,14 +153,6 @@ public class MainActivity extends Activity {
     	System.out.println("Entrou trataResposta");
     	Atribuicao melhorAtribuicao = controller.getMelhorAtribuicao();
     	
-    	//TODO: APAGAR - DEBUG
-    	if (controller == null)
-    		System.out.println ("Controller null");
-    	if (melhorAtribuicao == null) {
-    		System.out.println ("Nao pegou melhor atribuicao : controller zuado.");
-    		melhorAtribuicao = controller.atribuicao;
-    	}
-    	
     	Modalidade modalidade = null;
     	if (catalogo.getModalidades() != null && catalogo.getModalidades().size() > 0){
 	    	for (Modalidade mod: catalogo.getModalidades()){
