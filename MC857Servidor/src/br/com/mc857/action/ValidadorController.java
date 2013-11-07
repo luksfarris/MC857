@@ -72,11 +72,10 @@ public class ValidadorController extends ActionSupport{
 			}
 		}
 		
-		
 		//vamos ver as diciplinas obrigatorias da modalidade
 		boolean fezAsObrigatoriasDaModalidade = true;
 
-		if(historico.getModalidade() != null){
+		if(historico.getModalidade() != null && !historico.getModalidade().equals("") ){
 			for(Modalidade modalidade : catalogo.getModalidades()){
 				if(modalidade.getNome().equals(historico.getModalidade())){
 					fezAsObrigatoriasDaModalidade = 
