@@ -33,6 +33,12 @@ public class ValidadorController extends ActionSupport{
 		return inputStream;
 	}
 
+	/**
+     * Valida a atribuicao
+     * @param atribuicaoString Json da atribuicao realizada
+     * @param ra RA do aluno que sera validado
+     * @return booleano dizendo se o aluno se formou ou nao.
+     */
 	@Action(value = "valida", results = {
 			@Result( type="stream", name=SUCCESS)}
 			)
@@ -45,7 +51,13 @@ public class ValidadorController extends ActionSupport{
 
 		return SUCCESS;
 	}
-
+	
+	/**
+     * Valida a atribuicao
+     * @param atribuicao Atribuicao realizada pela aplicacao
+     * @param ra RA do aluno
+     * @return booleano dizendo se o aluno se formou ou nao.
+     */
 	private Boolean validaIntegralizacao(Atribuicao atribuicao, String ra){
 		StringBuffer histBuffer = HttpConnector.connect(URL_BASE + "?serv=h&ra="+ra);
 		Historico historico = Parser.parseHistorico(histBuffer.toString());
@@ -106,6 +118,12 @@ public class ValidadorController extends ActionSupport{
 		return true;
 	}
 
+	/**
+     * Verifica se a atribuicao contem todas as obrigatorias da lista passada
+     * @param feitas disciplinas cursadas
+     * @param necessarias as disciplinas obrigatorias necessarias
+     * @return booleano dizendo se o aluno cumpriu ou nao as obrigatorias.
+     */
 	private Boolean cumpriuObrigatorias(List<Disciplina> feitas, List<Disciplina> necessarias){
 		Boolean cumpriu = true;
 		
@@ -122,6 +140,12 @@ public class ValidadorController extends ActionSupport{
 		return cumpriu;
 	}
 	
+	/**
+     * Verifica se a atribuicao contem todas as eletivas da lista passada
+     * @param feitas disciplinas eletivas cursadas
+     * @param necessarias as disciplinas eletivas necessarias
+     * @return booleano dizendo se o aluno cumpriu ou nao as eletivas.
+     */
 	private Boolean cumpriuEletivas(List<Disciplina> feitas, List<Disciplina> necessarias, int credito){
 		int creditoFeito = 0;
 		

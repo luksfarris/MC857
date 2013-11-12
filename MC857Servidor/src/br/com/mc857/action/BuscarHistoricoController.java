@@ -22,7 +22,12 @@ public class BuscarHistoricoController  extends ActionSupport{
 	public InputStream getInputStream() {
 		return inputStream;
 	}
-
+	
+	/**
+     * Pega o xml do Historico no servidor de dados dado o RA do aluno
+     * @param ra Ra do aluno
+     * @return xml do Historico.
+     */
 	@Action(value = "buscaHistorico", results = {
 			@Result( type="stream", name=SUCCESS)}
 			)

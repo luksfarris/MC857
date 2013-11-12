@@ -23,6 +23,11 @@ public class BuscarCatalogoController extends ActionSupport{
 	    return inputStream;
 	   }
 	
+	 /**
+     * Pega o xml do Catalogo no servidor de dados dado o Codigo
+     * @param cod Codigo do catalogo (curso)
+     * @return xml do Catalogo.
+     */
 	@Action(value = "buscaCatalogo", results = {
 			@Result( type="stream", name=SUCCESS)}
 	)

@@ -7,6 +7,11 @@ import java.net.URL;
 
 public class HttpConnector {
 	
+	/**
+     * Metodo auxiliar que faz conexao com a url desejada
+     * @param url url que deve ser conectada
+     * @return StringBuffer com o conteudo da resposta proveniente da url
+     */
 	public static StringBuffer connect(String url) {
 		StringBuffer histBuffer = null;
 		try {

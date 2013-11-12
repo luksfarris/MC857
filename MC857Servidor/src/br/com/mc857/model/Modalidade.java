@@ -4,7 +4,9 @@ import java.util.List;
 
 public class Modalidade {
 	private String nome;
+	// obrigatorias da modalidade
 	private List<Disciplina> disciplinas;
+	// eletivas ou eletorias da modalidade
 	private List<GrupoEletiva> grupos;
 	
 	public String getNome() {

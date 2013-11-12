@@ -17,6 +17,7 @@ public class Disciplina {
 		this.credito = credito;
 	}
 	
+	// metodo que verifica se duas siglas sao iguais, levando em consideracao siglas que contem --- ou sao -----
 	@Override
 	public boolean equals(Object obj) {
 		boolean isEqual = obj instanceof Disciplina; 

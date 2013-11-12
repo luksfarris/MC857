@@ -20,6 +20,11 @@ import br.com.mc857.model.Modalidade;
 
 public class Parser {
 
+	/**
+     * Transforma um xml em um objeto do tipo Historico
+     * @param xml historico em xml
+     * @return Historico
+     */
 	public static Historico parseHistorico(String xml) {
 		Historico hist = new Historico();
 		try {
@@ -65,6 +70,11 @@ public class Parser {
 		return hist;
 	}
 
+	/**
+     * Transforma um xml em um objeto do tipo Catalogo
+     * @param xml catalogo em xml
+     * @return o catalogo
+     */
 	public static Catalogo parseCatalogo(String xml) {
 		Catalogo cat = new Catalogo();
 
