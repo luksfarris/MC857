@@ -13,11 +13,11 @@ Etapas
 >
 [X] Revisão da modelagem e contratos
 >
-[ ] Construção (implementação)
+[X] Construção (implementação)
 >
-[ ] Testes
+[X] Testes
 >
-[ ] Entrega Final
+[X] Entrega Final
 
 Instalando Python
 =====
