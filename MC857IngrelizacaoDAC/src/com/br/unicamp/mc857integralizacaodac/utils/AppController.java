@@ -422,6 +422,10 @@ public class AppController {
 		return atribuicao;
 	}
 	
+	/**
+	 * Checa se o usuario fez as disciplinas obrigatorias.
+	 * @return  {@value true} se o usuario fez as obrigatorias.
+	 */
 	public boolean fezObrigatorias () {
 		if (catalogo.getDisciplinas().size() != atribuicao.getDisciplinas().size()){
 			return false;

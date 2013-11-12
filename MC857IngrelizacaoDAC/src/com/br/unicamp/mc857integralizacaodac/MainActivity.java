@@ -213,6 +213,12 @@ public class MainActivity extends Activity {
     	return resposta;
     }
     
+    /**
+     * Pega as disciplinas obrigatorias restantes.
+     * @param feitas as feitas
+     * @param necessarias as necessarias
+     * @return as faltantes.
+     */
     private List<Disciplina> listObrigatoriasRestantes(List<Disciplina> feitas, List<Disciplina> necessarias){
     	if (feitas==null && necessarias == null) {
     		return new ArrayList<Disciplina>();
@@ -234,6 +240,13 @@ public class MainActivity extends Activity {
 		return necessarias;
 	}
     
+    /**
+     * Pega as eletivas restantes.
+     * @param feitas as feitas.
+     * @param necessarias as necessarias.
+     * @param credito creditos corrente.
+     * @return as eletivas faltantes.
+     */
     private String eletivasRestantes(List<Disciplina> feitas, List<Disciplina> necessarias, int credito){
 		String eletivas = "";
 		if(feitas == null) {
